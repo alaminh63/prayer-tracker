@@ -1,0 +1,270 @@
+    "use client"
+
+import { useAppSelector, useAppDispatch } from "@/store/hooks"
+import {
+  toggleAzanAlert,
+  toggleSehriAlert,
+  toggleIftarAlert,
+  toggleAutoLocation,
+  setCalculationMethod,
+  setAsrMethod,
+  setHijriOffset,
+} from "@/store/settingsSlice"
+import { fetchLocation } from "@/store/locationSlice"
+import { setLanguage } from "@/store/settingsSlice"
+import { useTranslation } from "@/hooks/use-translation"
+import { cn } from "@/lib/utils"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Bell, Moon, Sun, MapPin, Calculator, Info } from "lucide-react"
+import { useTheme } from "next-themes"
+
+const calculationMethods = [
+  { value: "1", label: "University of Islamic Sciences, Karachi" },
+  { value: "2", label: "Islamic Society of North America (ISNA)" },
+  { value: "3", label: "Muslim World League" },
+  { value: "4", label: "Umm Al-Qura University, Makkah" },
+  { value: "5", label: "Egyptian General Authority of Survey" },
+  { value: "7", label: "Institute of Geophysics, University of Tehran" },
+  { value: "8", label: "Gulf Region" },
+  { value: "9", label: "Kuwait" },
+  { value: "10", label: "Qatar" },
+  { value: "11", label: "Majlis Ugama Islam Singapura" },
+  { value: "14", label: "Bangladesh Islamic Foundation" },
+]
+
+function SettingRow({
+  icon: Icon,
+  iconColor = "text-primary",
+  iconBg = "bg-primary/10",
+  label,
+  htmlFor,
+  checked,
+  onToggle,
+}: {
+  icon: React.ElementType
+  iconColor?: string
+  iconBg?: string
+  label: string
+  htmlFor: string
+  checked: boolean
+  onToggle: () => void
+}) {
+  return (
+    <div className="flex items-center justify-between py-1">
+      <div className="flex items-center gap-3">
+        <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${iconBg} border border-border/50`}>
+          <Icon className={`h-4 w-4 ${iconColor}`} aria-hidden="true" />
+        </div>
+        <Label htmlFor={htmlFor} className="text-sm text-foreground cursor-pointer">
+          {label}
+        </Label>
+      </div>
+      <Switch id={htmlFor} checked={checked} onCheckedChange={onToggle} />
+    </div>
+  )
+}
+
+export function SettingsPanel() {
+  const dispatch = useAppDispatch()
+  const settings = useAppSelector((state) => state.settings)
+  const location = useAppSelector((state) => state.location)
+  const { t } = useTranslation()
+  const { theme, setTheme } = useTheme()
+
+  return (
+    <div className="flex flex-col gap-4 mt-2">
+      {/* Language Settings */}
+      <section className="glass-card rounded-2xl p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4 flex items-center gap-2">
+          <Info className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          {t.settings.language}
+        </h2>
+        <div className="space-y-3">
+          <Select
+            value={settings.language}
+            onValueChange={(value) =>
+              dispatch(setLanguage(value as "en" | "bn"))
+            }
+          >
+            <SelectTrigger className="bg-secondary/50 border-border text-foreground">
+              <SelectValue placeholder="Select language" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="bn">বাংলা (Bengali)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </section>
+
+      {/* Notification Settings */}
+      <section className="glass-card rounded-2xl p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4 flex items-center gap-2">
+          <Bell className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          {t.settings.notifications}
+        </h2>
+        <div className="flex flex-col gap-4">
+          <SettingRow
+            icon={Bell}
+            label={t.settings.azan_alert}
+            htmlFor="azan-alert"
+            checked={settings.azanAlert}
+            onToggle={() => dispatch(toggleAzanAlert())}
+          />
+          <SettingRow
+            icon={Moon}
+            label={t.settings.sehri_alert}
+            htmlFor="sehri-alert"
+            checked={settings.sehriAlert}
+            onToggle={() => dispatch(toggleSehriAlert())}
+          />
+          <SettingRow
+            icon={Sun}
+            iconColor="text-accent"
+            iconBg="bg-accent/10"
+            label={t.settings.iftar_alert}
+            htmlFor="iftar-alert"
+            checked={settings.iftarAlert}
+            onToggle={() => dispatch(toggleIftarAlert())}
+          />
+        </div>
+      </section>
+
+      {/* Location Settings */}
+      <section className="glass-card rounded-2xl p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4 flex items-center gap-2">
+          <MapPin className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          {t.settings.location}
+        </h2>
+        <div className="flex flex-col gap-4">
+          <SettingRow
+            icon={MapPin}
+            label={t.settings.auto_location}
+            htmlFor="auto-location"
+            checked={settings.autoLocation}
+            onToggle={() => {
+              dispatch(toggleAutoLocation())
+              if (!settings.autoLocation) {
+                dispatch(fetchLocation())
+              }
+            }}
+          />
+          {location.latitude && location.longitude && (
+            <div className="rounded-xl bg-secondary/50 border border-border p-3.5 text-xs text-muted-foreground font-mono">
+              <div className="flex items-center gap-4">
+                <span>Lat: {location.latitude.toFixed(4)}</span>
+                <span>Lng: {location.longitude.toFixed(4)}</span>
+              </div>
+              {location.city && (
+                <p className="mt-1.5 text-foreground font-sans font-medium">{location.city}</p>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Advanced Settings */}
+      <section className="glass-card rounded-2xl p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4 flex items-center gap-2">
+          <Calculator className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          {t.settings.asr_method}
+        </h2>
+        
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">{t.settings.asr_method}</Label>
+            <Select
+              value={settings.asrMethod.toString()}
+              onValueChange={(value) =>
+                dispatch(setAsrMethod(parseInt(value) as 0 | 1))
+              }
+            >
+              <SelectTrigger className="bg-secondary/50 border-border text-foreground">
+                <SelectValue placeholder="Select school" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">{t.settings.asr_standard}</SelectItem>
+                <SelectItem value="1">{t.settings.asr_hanafi}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">{t.settings.hijri_offset}</Label>
+            <div className="flex items-center gap-2">
+              {[-2, -1, 0, 1, 2].map((offset) => (
+                <button
+                  key={offset}
+                  onClick={() => dispatch(setHijriOffset(offset))}
+                  className={cn(
+                    "flex-1 py-2 rounded-xl text-xs font-bold border transition-all",
+                    settings.hijriOffset === offset 
+                      ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20" 
+                      : "bg-secondary/50 border-border text-foreground hover:bg-secondary"
+                  )}
+                >
+                  {offset > 0 ? `+${offset}` : offset}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 mt-4 text-[11px] text-muted-foreground">
+          <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden="true" />
+          <p className="leading-relaxed">
+            {settings.language === "bn" 
+              ? "বিভিন্ন অঞ্চলে নামাজের ওয়াক্ত গণনার জন্য আলাদা আলাদা পদ্ধতি ব্যবহার করা হয়। আপনার এলাকার জন্য উপযুক্ত পদ্ধতিটি বেছে নিন।"
+              : "Different regions use different calculation methods for prayer times. Choose the one most appropriate for your area."
+            }
+          </p>
+        </div>
+      </section>
+
+      {/* Appearance Settings */}
+      <section className="glass-card rounded-2xl p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4 flex items-center gap-2">
+          <Sun className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          {t.settings.theme}
+        </h2>
+        <div className="space-y-3">
+          <Select
+            value={theme}
+            onValueChange={(value) =>
+              setTheme(value)
+            }
+          >
+            <SelectTrigger className="bg-secondary/50 border-border text-foreground">
+              <SelectValue placeholder="Select theme" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">{t.settings.theme_light}</SelectItem>
+              <SelectItem value="dark">{t.settings.theme_dark}</SelectItem>
+              <SelectItem value="system">{t.settings.theme_system}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </section>
+
+      {/* App Info */}
+      <section className="glass-card rounded-2xl p-5 text-center">
+        <p className="text-sm font-semibold text-foreground">Salat Time</p>
+        <p className="text-[11px] text-muted-foreground mt-1">{settings.language === "bn" ? "ভার্সন ২.০" : "Version 2.0"}</p>
+        <p className="text-[11px] text-muted-foreground mt-2">
+          {settings.language === "bn" 
+            ? "নামাজের ওয়াক্তসমূহ Aladhan API দ্বারা পরিচালিত"
+            : "Prayer times powered by Aladhan API"
+          }
+        </p>
+      </section>
+    </div>
+  )
+}
