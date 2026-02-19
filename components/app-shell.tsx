@@ -2,24 +2,26 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Clock, Bell, Settings, Compass, Calendar, Calculator, Hand, BookOpen, Heart, Activity, SunMoon, Coins } from "lucide-react"
+import { Home, Clock, Bell, Settings, Compass, Calendar, Calculator, Hand, BookOpen, Heart, Activity, SunMoon, Coins, Bookmark, History as HistoryIcon, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LocationInitializer } from "@/components/location-initializer"
 import { useServiceWorker } from "@/hooks/use-service-worker"
 import { useTranslation } from "@/hooks/use-translation"
+import { GlobalAudioPlayer } from "@/components/quran/global-audio-player"
+import { AdhanPlayer } from "@/components/adhan-player"
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt"
 
 const navItems = [
   { href: "/", icon: Home, label: "Home" },
   { href: "/prayers", icon: Clock, label: "Prayers" },
   { href: "/tracker", icon: Activity, label: "Tracker" },
-  { href: "/qibla", icon: Compass, label: "Qibla" },
-  { href: "/tasbih", icon: Hand, label: "Tasbih" },
-  { href: "/azkar", icon: SunMoon, label: "Azkar" },
   { href: "/calendar", icon: Calendar, label: "Calendar" },
-  { href: "/zakat", icon: Calculator, label: "Zakat" },
-  { href: "/fitra", icon: Coins, label: "Fitra" },
-  { href: "/names", icon: BookOpen, label: "99 Names" },
-  { href: "/duas", icon: Heart, label: "Duas" },
+  { href: "/qibla", icon: Compass, label: "Qibla" },
+  { href: "/deen", icon: Heart, label: "Deen Hub" },
+  { href: "/quran", icon: BookOpen, label: "Quran" },
+  { href: "/hadith", icon: BookOpen, label: "Hadith" },
+  { href: "/quran/bookmarks", icon: Bookmark, label: "Bookmarks" },
+  { href: "/quran/history", icon: HistoryIcon, label: "History" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ]
 
@@ -144,6 +146,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Safe area for iOS */}
         <div className="h-[env(safe-area-inset-bottom)]" />
       </nav>
+
+      <GlobalAudioPlayer />
+      <AdhanPlayer />
+      <PWAInstallPrompt />
     </div>
   )
 }

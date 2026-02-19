@@ -11,6 +11,7 @@ interface SettingsState {
   hijriOffset: number
   language: "en" | "bn"
   notificationPermission: NotificationPermission | "default"
+  audioEnabled: boolean
 }
 
 const initialState: SettingsState = {
@@ -24,6 +25,7 @@ const initialState: SettingsState = {
   hijriOffset: 0,
   language: "bn",
   notificationPermission: "default",
+  audioEnabled: typeof window !== "undefined" ? localStorage.getItem("salat_audio_enabled") === "true" : false,
 }
 
 export const saveSettings = createAsyncThunk(
@@ -81,6 +83,12 @@ const settingsSlice = createSlice({
     ) => {
       state.notificationPermission = action.payload
     },
+    setAudioEnabled: (state, action: PayloadAction<boolean>) => {
+      state.audioEnabled = action.payload
+      if (typeof window !== "undefined") {
+        localStorage.setItem("salat_audio_enabled", action.payload.toString())
+      }
+    },
   },
 })
 
@@ -95,5 +103,6 @@ export const {
   setHijriOffset,
   setLanguage,
   setNotificationPermission,
+  setAudioEnabled,
 } = settingsSlice.actions
 export default settingsSlice.reducer

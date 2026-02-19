@@ -59,7 +59,7 @@ export function TasbihCounter() {
       {/* Main Counter Area */}
       <div 
         onClick={increment}
-        className="relative aspect-square w-full max-w-[280px] mx-auto flex items-center justify-center cursor-pointer select-none active:scale-95 transition-transform"
+        className="relative aspect-square w-full max-w-[400px] mx-auto flex items-center justify-center cursor-pointer select-none active:scale-95 transition-transform"
       >
         {/* Animated Rings */}
         <div className={cn(

@@ -1,5 +1,6 @@
 "use client"
 
+import React, { useEffect, useState } from "react"
 import { useAppSelector } from "@/store/hooks"
 import { useAppDispatch } from "@/store/hooks"
 import { fetchLocation } from "@/store/locationSlice"
@@ -21,6 +22,11 @@ export function PageHeader({
     useAppSelector((state) => state.location)
   const { hijriDate, hijriMonth, hijriYear, gregorianDate, loading: prayerLoading } =
     useAppSelector((state) => state.prayer)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const locationText = locLoading
     ? "Detecting..."
@@ -62,7 +68,7 @@ export function PageHeader({
         </div>
 
         {/* Location + Date chips */}
-        {(showLocation || showDate) && (
+        {mounted && (showLocation || showDate) && (
           <div className="flex flex-wrap items-center gap-2 mt-4">
             {showLocation && (
               <div className="flex items-center gap-1.5 rounded-full bg-secondary/60 border border-border px-3 py-1.5 text-xs text-muted-foreground">

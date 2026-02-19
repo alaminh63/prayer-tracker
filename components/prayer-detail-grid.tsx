@@ -70,7 +70,7 @@ export function PrayerDetailGrid() {
   })
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mt-2">
       {allTimes.map((prayer) => {
         const timeDate = parseTimeString(prayer.time)
         const isPast = new Date() > timeDate && !prayer.isCurrent
@@ -135,14 +135,14 @@ export function PrayerDetailGrid() {
               <div className="text-right">
                 <p
                   className={cn(
-                    "text-xl font-mono font-bold tabular-nums",
+                    "text-2xl font-mono font-black tabular-nums tracking-tight",
                     prayer.isNext ? "text-primary text-glow-gold" : "text-foreground"
                   )}
                 >
                   {`${hours12}:${minutes}`}
-                </p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                  {period}
+                  <span className="text-[10px] ml-1 text-muted-foreground uppercase font-sans font-bold">
+                    {period}
+                  </span>
                 </p>
               </div>
             </div>

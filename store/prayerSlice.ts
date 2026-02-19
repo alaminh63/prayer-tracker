@@ -10,6 +10,7 @@ interface PrayerState {
   currentPrayer: PrayerName | null
   nextPrayer: PrayerName | null
   timeLeft: number
+  monthlyTimings: any[] | null
   loading: boolean
   error: string | null
 }
@@ -23,6 +24,7 @@ const initialState: PrayerState = {
   currentPrayer: null,
   nextPrayer: null,
   timeLeft: 0,
+  monthlyTimings: null,
   loading: false,
   error: null,
 }
@@ -93,6 +95,34 @@ export const fetchPrayerTimes = createAsyncThunk(
   }
 )
 
+export const fetchMonthlyPrayerTimes = createAsyncThunk(
+  "prayer/fetchMonthlyPrayerTimes",
+  async (
+    params: { latitude: number; longitude: number; method: number; school: number; month?: number; year?: number },
+    { rejectWithValue }
+  ) => {
+    const { latitude, longitude, method, school, month, year } = params
+    const query = new URLSearchParams({
+      latitude: latitude.toString(),
+      longitude: longitude.toString(),
+      method: method.toString(),
+      school: school.toString(),
+    })
+    if (month) query.append("month", month.toString())
+    if (year) query.append("year", year.toString())
+
+    try {
+      const res = await fetch(`/api/prayer-times/monthly?${query.toString()}`)
+      if (!res.ok) throw new Error("Failed to fetch monthly prayer times")
+      return await res.json()
+    } catch (err) {
+      return rejectWithValue(
+        err instanceof Error ? err.message : "Failed to fetch monthly prayer times"
+      )
+    }
+  }
+)
+
 const prayerSlice = createSlice({
   name: "prayer",
   initialState: loadInitialState(),
@@ -126,6 +156,17 @@ const prayerSlice = createSlice({
         }
       })
       .addCase(fetchPrayerTimes.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      .addCase(fetchMonthlyPrayerTimes.pending, (state) => {
+        state.loading = true
+      })
+      .addCase(fetchMonthlyPrayerTimes.fulfilled, (state, action) => {
+        state.loading = false
+        state.monthlyTimings = action.payload
+      })
+      .addCase(fetchMonthlyPrayerTimes.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })

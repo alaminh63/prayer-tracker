@@ -1,67 +1,105 @@
-const CACHE_NAME = "salat-time-v1"
-const urlsToCache = ["/", "/prayers", "/settings", "/notifications"]
+const CACHE_NAME = 'prayer-tracker-v1';
+const URLS_TO_CACHE = [
+  '/',
+  '/quran',
+  '/quran/history',
+  '/quran/bookmarks',
+  '/manifest.json',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png'
+];
 
-self.addEventListener("install", (event) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache)
-    })
-  )
-  self.skipWaiting()
-})
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(URLS_TO_CACHE))
+  );
+});
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      )
-    })
-  )
-  self.clients.claim()
-})
-
-self.addEventListener("fetch", (event) => {
-  // Only cache http/https requests
-  if (!event.request.url.startsWith("http")) return
-
-  // Network first, then cache fallback
+self.addEventListener('fetch', (event) => {
   event.respondWith(
-    fetch(event.request)
+    caches.match(event.request)
       .then((response) => {
-        // Cache successful responses
-        if (response.status === 200) {
-          const responseClone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone)
-          })
+        if (response) {
+          return response;
         }
-        return response
+        return fetch(event.request).then(
+          (response) => {
+            if(!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                if (event.request.url.includes('api.alquran.cloud')) {
+                   cache.put(event.request, responseToCache);
+                }
+              });
+            return response;
+          }
+        );
       })
-      .catch(() => {
-        return caches.match(event.request)
-      })
-  )
-})
+  );
+});
 
-// Handle push notifications
-self.addEventListener("push", (event) => {
-  const data = event.data ? event.data.json() : {}
-  const title = data.title || "Salat Time"
-  const options = {
-    body: data.body || "Time for prayer",
-    icon: "/icon.svg",
-    badge: "/icon.svg",
-    vibrate: [200, 100, 200],
-    tag: data.tag || "prayer-notification",
-  }
+// Notification handling
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : { title: 'Salat Time', body: 'নামাজের সময় হয়েছে।' };
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-192x192.png',
+      tag: 'prayer-alert',
+      renotify: true,
+      data: { url: data.url || '/', playAdhan: true },
+      actions: [
+        { action: 'play', title: 'Play Adhan (আজান দিন)' },
+        { action: 'close', title: 'Dismiss' }
+      ]
+    })
+  );
+});
 
-  event.waitUntil(self.registration.showNotification(title, options))
-})
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
 
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close()
-  event.waitUntil(clients.openWindow("/"))
-})
+  if (event.action === 'close') return;
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Handle stop action
+      if (event.action === 'stop') {
+        for (const client of clientList) {
+          if ('postMessage' in client) {
+            client.postMessage({ type: 'STOP_ADHAN' });
+          }
+        }
+        return;
+      }
+
+      // If a window is already open, focus it
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus().then(c => {
+            if (event.action === 'play') {
+              c.postMessage({ type: 'PLAY_ADHAN' });
+            }
+          });
+        }
+      }
+      // Otherwise open a new window
+      if (clients.openWindow) {
+        return clients.openWindow(event.notification.data.url || '/').then(windowClient => {
+          if (windowClient && event.action === 'play') {
+            // Give it a moment to load then post message
+            setTimeout(() => {
+              windowClient.postMessage({ type: 'PLAY_ADHAN' });
+            }, 2000);
+          }
+        });
+      }
+    })
+  );
+});

@@ -116,7 +116,7 @@ export function QiblaCompass() {
         </p>
       </div>
 
-      <div className="relative h-48 w-48 flex items-center justify-center">
+      <div className="relative h-64 w-64 flex items-center justify-center transition-all">
         {/* Compass Outer Ring */}
         <div className="absolute inset-0 rounded-full border-2 border-border/50 bg-secondary/20 shadow-inner" />
         

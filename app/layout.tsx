@@ -60,6 +60,7 @@ export const viewport: Viewport = {
 }
 
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "sonner"
 
 export default function RootLayout({
   children,
@@ -79,6 +80,7 @@ export default function RootLayout({
             storageKey="salat_theme"
           >
             {children}
+            <Toaster position="top-center" richColors />
             <Analytics />
           </ThemeProvider>
         </ReduxProvider>

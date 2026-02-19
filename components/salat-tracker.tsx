@@ -19,7 +19,7 @@ export function SalatTracker() {
       try {
         const res = await fetch(`/api/prayers/track?date=${date}`)
         const data = await res.json()
-        setTracking(data.prayers || {})
+        setTracking(data.salat || {})
       } catch (error) {
         console.error("Failed to fetch tracking:", error)
       } finally {
@@ -37,7 +37,7 @@ export function SalatTracker() {
       await fetch("/api/prayers/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, prayerId, status: newStatus })
+        body: JSON.stringify({ date, id: prayerId, category: "salat", status: newStatus })
       })
     } catch (error) {
       console.error("Failed to update status:", error)

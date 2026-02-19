@@ -10,9 +10,23 @@ export async function GET(request: Request) {
     
     const record = await db.collection("prayer_tracking").findOne({ date })
     
-    return NextResponse.json(record || { date, prayers: {} })
+    if (record) {
+      // Migration: fallback for old structure
+      if (record.prayers && !record.salat) {
+        record.salat = record.prayers
+      }
+      return NextResponse.json({
+        date: record.date,
+        salat: record.salat || {},
+        morning: record.morning || {},
+        evening: record.evening || {},
+        night: record.night || {},
+      })
+    }
+    
+    return NextResponse.json({ date, salat: {}, morning: {}, evening: {}, night: {} })
   } catch (error) {
-    console.error("Failed to fetch prayer tracking:", error)
+    console.error("Failed to fetch tracking data:", error)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
@@ -20,15 +34,16 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { date, prayerId, status } = body
+    const { date, id, category = "salat", status } = body
     
-    if (!date || !prayerId) {
+    if (!date || !id) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
     
     const { db } = await connectToDatabase()
     
-    const updatePath = `prayers.${prayerId}`
+    // Category mapping ensures we update the right object in the document
+    const updatePath = `${category}.${id}`
     
     await db.collection("prayer_tracking").updateOne(
       { date },
@@ -38,7 +53,7 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Failed to update prayer tracking:", error)
+    console.error("Failed to update tracking data:", error)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
