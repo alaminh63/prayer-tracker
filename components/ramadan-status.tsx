@@ -42,53 +42,57 @@ export function RamadanStatus() {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
       className={cn(
-        "relative overflow-hidden rounded-[2rem] border bg-linear-to-br p-6 backdrop-blur-xl",
+        "relative overflow-hidden rounded-[2.5rem] border bg-linear-to-br p-8 backdrop-blur-3xl shadow-2xl group",
         color
       )}
     >
-      <div className="absolute -right-6 -bottom-6 opacity-10">
-        <Moon size={120} />
+      <div className="absolute -right-8 -bottom-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
+        <Moon size={160} />
       </div>
       
-      <div className="relative flex flex-col gap-4">
+      <div className="relative flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-white/10">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-white/10 ring-1 ring-white/10">
               {icon}
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Ramadan Phase</p>
-              <h3 className="text-xl font-black">{phaseBn} ({phase})</h3>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-0.5">Ramadan Phase</p>
+              <h3 className="text-2xl font-black tracking-tight">{phaseBn} ({phase})</h3>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Ramadan Day</p>
-            <p className="text-2xl font-black">{day}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-0.5">Ramadan Day</p>
+            <p className="text-4xl font-black tracking-tighter">{day}</p>
           </div>
         </div>
         
-        <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
-          <p className="text-sm font-medium leading-relaxed">
+        <div className="p-4 rounded-3xl bg-white/5 border border-white/5 backdrop-blur-sm">
+          <p className="text-sm font-bold leading-relaxed">
             {phaseDescBn}
             <br />
-            <span className="text-xs opacity-70">{phaseDesc}</span>
+            <span className="text-[11px] font-medium opacity-60 uppercase tracking-wider">{phaseDesc}</span>
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-[10px] font-bold uppercase tracking-tighter">
-            <span>Progress</span>
-            <span>{Math.round((day / 30) * 100)}%</span>
+        <div className="space-y-3">
+          <div className="flex justify-between items-end">
+             <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Ramadan Progress</span>
+             <span className="text-lg font-black tracking-tighter">{Math.round((day / 30) * 100)}%</span>
           </div>
-          <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+          <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden p-0.5 ring-1 ring-white/5">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${(day / 30) * 100}%` }}
-              className="h-full bg-current opacity-50 rounded-full"
-            />
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="h-full bg-current rounded-full relative"
+            >
+               <div className="absolute inset-0 bg-white/20 animate-pulse" />
+            </motion.div>
           </div>
         </div>
       </div>

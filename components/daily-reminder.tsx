@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useMemo } from "react"
-import { Quote } from "lucide-react"
+import { Quote, Star } from "lucide-react"
 import { useTranslation } from "@/hooks/use-translation"
 
 interface Reminder {
@@ -57,32 +57,40 @@ export function DailyReminder() {
   }, [])
 
   return (
-    <div className="relative overflow-hidden rounded-3xl p-6 glass-card-strong">
+    <div className="relative overflow-hidden rounded-[2.5rem] p-10 bg-zinc-950/40 border border-white/5 backdrop-blur-3xl shadow-2xl group ring-1 ring-white/5">
       {/* Decorative Quote Icon */}
-      <div className="absolute -top-2 -left-2 opacity-5">
-        <Quote className="h-24 w-24" />
+      <div className="absolute -top-4 -left-4 opacity-[0.03] text-primary transition-transform group-hover:scale-110 duration-700">
+        <Quote className="h-40 w-40" />
       </div>
 
-      <div className="relative z-10 space-y-4">
+      <div className="relative z-10 flex flex-col gap-8">
         <div className="flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
-            {dailyReminder.type === "Ayat" ? t.reminders.ayat_label : t.reminders.hadith_label}
-          </span>
-          <Quote className="h-4 w-4 text-primary/40" />
+          <div className="flex items-center gap-3">
+             <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                <Star size={14} className="fill-primary" />
+             </div>
+             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+               {dailyReminder.type === "Ayat" ? t.reminders.ayat_label : t.reminders.hadith_label}
+             </span>
+          </div>
+          <Quote className="h-5 w-5 text-primary/30" />
         </div>
 
-        <p className="text-lg font-medium leading-relaxed text-foreground/90 italic">
+        <p className="text-2xl md:text-3xl font-black leading-tight text-white italic tracking-tight underline decoration-primary/20 underline-offset-8">
           "{dailyReminder.text}"
         </p>
 
-        <div className="flex items-center justify-between pt-2 border-t border-border/50">
-          <p className="text-xs font-serif text-primary/80">
-            — {dailyReminder.source}
-          </p>
-          <div className="flex gap-1">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
-            <div className="h-1.5 w-4 rounded-full bg-primary" />
-            <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
+        <div className="flex items-center justify-between pt-8 border-t border-white/5 gap-4">
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            <p className="text-xs font-black text-primary uppercase tracking-widest">
+              {dailyReminder.source}
+            </p>
+          </div>
+          <div className="flex gap-1.5 focus-within:ring-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-white/10" />
+            <div className="h-1.5 w-6 rounded-full bg-primary" />
+            <div className="h-1.5 w-1.5 rounded-full bg-white/10" />
           </div>
         </div>
       </div>

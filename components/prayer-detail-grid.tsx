@@ -9,7 +9,8 @@ import {
   type PrayerName,
 } from "@/lib/prayer-utils"
 import { cn } from "@/lib/utils"
-import { Sunrise, Clock } from "lucide-react"
+import { motion } from "framer-motion"
+import { Sunrise, Clock, Bell, BellOff } from "lucide-react"
 
 export function PrayerDetailGrid() {
   const { timings, currentPrayer, nextPrayer, loading } = useAppSelector(
@@ -18,144 +19,141 @@ export function PrayerDetailGrid() {
 
   if (loading || !timings) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="glass-card rounded-2xl p-5 animate-pulse">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-muted/30" />
-                <div className="flex flex-col gap-1.5">
-                  <div className="h-4 w-20 rounded bg-muted/30" />
-                  <div className="h-3 w-12 rounded bg-muted/30" />
-                </div>
-              </div>
-              <div className="h-8 w-24 rounded bg-muted/30 self-end" />
-            </div>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="h-40 rounded-3xl bg-white/5 animate-pulse border border-white/5" />
         ))}
       </div>
     )
   }
 
-  type PrayerItem = {
-    name: string
-    label: string
-    arabic: string
-    time: string
-    isNext: boolean
-    isCurrent: boolean
-    isSunrise: boolean
-  }
-
-  const allTimes: PrayerItem[] = PRAYER_NAMES.map((name) => ({
+  const prayers: PrayerName[] = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
+  
+  const allItems = prayers.map(name => ({
     name,
     label: PRAYER_LABELS[name],
     arabic: PRAYER_ARABIC[name],
     time: timings[name],
     isNext: nextPrayer === name,
     isCurrent: currentPrayer === name,
-    isSunrise: false,
+    isSunrise: false
   }))
 
-  // Insert Sunrise after Fajr
-  const sunriseIndex = allTimes.findIndex((t) => t.name === "Fajr") + 1
-  allTimes.splice(sunriseIndex, 0, {
-    name: "Sunrise",
-    label: "Sunrise",
-    arabic: "\u0634\u0631\u0648\u0642",
+  const sunriseIdx = allItems.findIndex(p => p.name === "Fajr") + 1
+  allItems.splice(sunriseIdx, 0, {
+    name: "Sunrise" as any,
+    label: "সূর্যোদয়",
+    arabic: "شروق",
     time: timings.Sunrise,
     isNext: false,
     isCurrent: false,
-    isSunrise: true,
+    isSunrise: true
   })
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mt-2">
-      {allTimes.map((prayer) => {
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {allItems.map((prayer, index) => {
         const timeDate = parseTimeString(prayer.time)
         const isPast = new Date() > timeDate && !prayer.isCurrent
-        const period = timeDate.getHours() >= 12 ? "PM" : "AM"
         const hours12 = timeDate.getHours() % 12 || 12
         const minutes = timeDate.getMinutes().toString().padStart(2, "0")
+        const period = timeDate.getHours() >= 12 ? "PM" : "AM"
 
         return (
-          <div
+          <motion.div
             key={prayer.name}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
             className={cn(
-              "relative overflow-hidden rounded-2xl p-5 transition-all group",
-              prayer.isNext
-                ? "glass-card-strong border-primary/30"
+              "group relative overflow-hidden p-6 rounded-4xl border transition-all duration-500",
+              prayer.isNext 
+                ? "bg-primary/10 border-primary/30 shadow-2xl shadow-primary/10 scale-[1.02] ring-1 ring-primary/20" 
                 : prayer.isCurrent
-                  ? "glass-card border-accent/20"
+                  ? "bg-accent/10 border-accent/30 shadow-xl shadow-accent/5 ring-1 ring-accent/20"
                   : isPast
-                    ? "bg-secondary/20 border border-transparent opacity-50"
-                    : "glass-card"
+                    ? "bg-zinc-900/40 border-white/5 opacity-60 grayscale-[0.5]"
+                    : "bg-zinc-950/40 border-white/5 hover:border-white/10 hover:bg-zinc-900/60"
             )}
           >
-            {/* Glow effect for next prayer */}
-            {prayer.isNext && (
-              <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
-            )}
+            {/* Background Accent */}
+            <div className={cn(
+              "absolute top-0 right-0 h-32 w-32 blur-3xl rounded-full opacity-10 group-hover:opacity-20 transition-opacity",
+              prayer.isNext ? "bg-primary" : prayer.isCurrent ? "bg-accent" : "bg-white"
+            )} />
 
-            <div className="relative flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {prayer.isSunrise ? (
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 border border-primary/15">
-                    <Sunrise className="h-5 w-5 text-primary" />
-                  </div>
-                ) : (
-                  <div
-                    className={cn(
-                      "flex h-11 w-11 items-center justify-center rounded-xl border text-sm font-bold",
-                      prayer.isNext
-                        ? "bg-primary/15 border-primary/20 text-primary"
-                        : prayer.isCurrent
-                          ? "bg-accent/15 border-accent/20 text-accent"
-                          : "bg-muted/30 border-border text-muted-foreground"
-                    )}
-                  >
-                    {prayer.label.charAt(0)}
-                  </div>
-                )}
+            <div className="relative flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className={cn(
+                  "h-14 w-14 rounded-2xl flex items-center justify-center border transition-all duration-500",
+                  prayer.isNext 
+                    ? "bg-primary/20 border-primary/40 text-primary rotate-3 group-hover:rotate-6" 
+                    : prayer.isCurrent
+                      ? "bg-accent/20 border-accent/40 text-accent"
+                      : "bg-white/5 border-white/10 text-zinc-500"
+                )}>
+                  {prayer.isSunrise ? <Sunrise size={24} /> : <span className="text-xl font-black">{prayer.label.charAt(0)}</span>}
+                </div>
+                
                 <div>
-                  <p
-                    className={cn(
-                      "font-semibold text-sm",
-                      prayer.isNext ? "text-primary" : "text-foreground"
-                    )}
-                  >
+                  <h3 className={cn(
+                    "text-lg font-black tracking-tight",
+                    prayer.isNext ? "text-primary" : prayer.isCurrent ? "text-accent" : "text-white"
+                  )}>
                     {prayer.label}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground font-serif mt-0.5">
+                  </h3>
+                  <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mt-0.5">
                     {prayer.arabic}
                   </p>
                 </div>
               </div>
 
               <div className="text-right">
-                <p
-                  className={cn(
-                    "text-2xl font-mono font-black tabular-nums tracking-tight",
-                    prayer.isNext ? "text-primary text-glow-gold" : "text-foreground"
-                  )}
-                >
-                  {`${hours12}:${minutes}`}
-                  <span className="text-[10px] ml-1 text-muted-foreground uppercase font-sans font-bold">
-                    {period}
-                  </span>
-                </p>
+                <div className={cn(
+                  "text-3xl font-black tabular-nums tracking-tighter flex items-baseline gap-1",
+                  prayer.isNext ? "text-primary shadow-glow-gold" : "text-white"
+                )}>
+                  {hours12}
+                  <span className="animate-pulse">:</span>
+                  {minutes}
+                  <span className="text-[10px] uppercase opacity-40 ml-0.5">{period}</span>
+                </div>
               </div>
             </div>
 
-            {prayer.isNext && (
-              <div className="relative mt-3 pt-3 border-t border-primary/15 flex items-center gap-1.5">
-                <Clock className="h-3 w-3 text-primary" />
-                <p className="text-[11px] text-primary font-medium">
-                  Coming up next
-                </p>
-              </div>
+            {/* Icons / Status Footer */}
+            <div className="mt-6 flex items-center justify-between">
+               <div className="flex items-center gap-2">
+                 {prayer.isNext && (
+                   <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-primary/20">
+                     <Clock size={12} className="animate-spin-slow" />
+                     Coming UP
+                   </span>
+                 )}
+                 {prayer.isCurrent && (
+                   <span className="px-3 py-1 rounded-full bg-accent/20 text-accent text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 border border-accent/30 shadow-lg shadow-accent/20">
+                     <div className="h-1.5 w-1.5 rounded-full bg-accent animate-ping" />
+                     Running
+                   </span>
+                 )}
+               </div>
+
+               <button className={cn(
+                 "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
+                 prayer.isNext || prayer.isCurrent ? "bg-zinc-800/80 text-white" : "bg-white/5 text-zinc-500 hover:text-zinc-300"
+               )}>
+                 <Bell size={18} />
+               </button>
+            </div>
+
+            {/* Glowing stripe for current/next */}
+            {(prayer.isNext || prayer.isCurrent) && (
+              <div className={cn(
+                "absolute top-0 left-0 w-full h-1",
+                prayer.isNext ? "bg-primary" : "bg-accent"
+              )} />
             )}
-          </div>
+          </motion.div>
         )
       })}
     </div>

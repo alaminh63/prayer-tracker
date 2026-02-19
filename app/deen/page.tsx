@@ -9,9 +9,11 @@ import { NamesOfAllah } from "@/components/names-of-allah"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTranslation } from "@/hooks/use-translation"
 import { cn } from "@/lib/utils"
-import { BookOpen, Sparkles, Heart } from "lucide-react"
+import { BookOpen, Sparkles, Heart, Calculator, Coins } from "lucide-react"
+import { ZakatCalculator } from "@/components/zakat-calculator"
+import { FitraCalculator } from "@/components/fitra-calculator"
 
-type TabType = "azkar" | "duas" | "names"
+type TabType = "azkar" | "duas" | "names" | "zakat" | "fitra"
 
 export default function DeenPage() {
   const [activeTab, setActiveTab] = useState<TabType>("azkar")
@@ -35,6 +37,18 @@ export default function DeenPage() {
       label: t.nav.names, 
       icon: <Heart size={18} />, 
       color: "from-primary/20 to-rose-500/20" 
+    },
+    { 
+      id: "zakat", 
+      label: t.nav.zakat, 
+      icon: <Calculator size={18} />, 
+      color: "from-primary to-orange-600" 
+    },
+    { 
+      id: "fitra", 
+      label: t.nav.fitra, 
+      icon: <Coins size={18} />, 
+      color: "from-emerald-500 to-teal-600" 
     },
   ]
 
@@ -62,7 +76,7 @@ export default function DeenPage() {
                 {isActive && (
                   <motion.div
                     layoutId="activeDeenTab"
-                    className={cn("absolute inset-0 bg-gradient-to-r shadow-2xl", tab.color)}
+                    className={cn("absolute inset-0 bg-linear-to-r shadow-2xl", tab.color)}
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
@@ -92,6 +106,8 @@ export default function DeenPage() {
               {activeTab === "azkar" && <div className="space-y-8"><AzkarViewer /></div>}
               {activeTab === "duas" && <div className="space-y-8"><DuaList /></div>}
               {activeTab === "names" && <div className="space-y-8"><NamesOfAllah /></div>}
+              {activeTab === "zakat" && <div className="space-y-8"><ZakatCalculator /></div>}
+              {activeTab === "fitra" && <div className="space-y-8"><FitraCalculator /></div>}
             </motion.div>
           </AnimatePresence>
         </div>

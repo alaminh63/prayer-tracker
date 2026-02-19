@@ -17,6 +17,7 @@ export const translations = {
       history: "History",
       settings: "Settings",
       deen_hub: "Spiritual Hub",
+      calculators: "Calculators",
     },
     settings: {
       title: "Settings",
@@ -135,6 +136,7 @@ export const translations = {
       history: "ইতিহাস",
       settings: "সেটিংস",
       deen_hub: "দ্বীন হাব",
+      calculators: "হিসাব-নিকাশ",
     },
     settings: {
       title: "সেটিংস",

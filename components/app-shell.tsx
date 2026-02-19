@@ -18,6 +18,7 @@ const navItems = [
   { href: "/calendar", icon: Calendar, label: "Calendar" },
   { href: "/qibla", icon: Compass, label: "Qibla" },
   { href: "/deen", icon: Heart, label: "Deen Hub" },
+  { href: "/calculators", icon: Calculator, label: "Calculators" },
   { href: "/quran", icon: BookOpen, label: "Quran" },
   { href: "/hadith", icon: BookOpen, label: "Hadith" },
   { href: "/quran/bookmarks", icon: Bookmark, label: "Bookmarks" },

@@ -65,49 +65,53 @@ export function HadithCard() {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-zinc-950/40 p-8 backdrop-blur-xl transition-all hover:border-primary/20 shadow-2xl"
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="group relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-zinc-950/40 p-8 backdrop-blur-3xl transition-all hover:border-primary/20 shadow-2xl ring-1 ring-white/5"
     >
       {/* Background Decor */}
-      <div className="absolute -right-6 -top-6 text-primary/5 transition-transform group-hover:scale-110 group-hover:rotate-12">
-        <Quote size={140} />
+      <div className="absolute -right-8 -top-8 text-primary/5 transition-transform group-hover:scale-110 group-hover:rotate-12 duration-700">
+        <Quote size={180} />
       </div>
 
       <div className="relative flex flex-col h-full">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-              <BookOpen className="h-5 w-5" />
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary ring-1 ring-primary/20">
+              <BookOpen className="h-6 w-6" />
             </div>
             <div>
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Daily Wisdom</span>
-              <h4 className="text-xs font-bold text-zinc-500">{dailyHadith.book}</h4>
+              <h4 className="text-sm font-black text-zinc-400 tracking-tight">{dailyHadith.book}</h4>
             </div>
           </div>
-          <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">
+          <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none bg-zinc-900/50 px-2 py-1 rounded-md border border-white/5">
             #{dailyHadith.hadith?.hadithnumber}
           </span>
         </div>
 
         <div className="flex-1 mb-8">
-          <p className="text-lg leading-relaxed text-zinc-100 font-medium italic font-inter decoration-primary/20">
+          <p className="text-xl leading-relaxed text-zinc-100 font-bold italic font-inter decoration-primary/20">
             "{dailyHadith.hadith?.text}"
           </p>
         </div>
 
-        <div className="flex items-center justify-between pt-6 border-t border-white/5">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Authentication</span>
-            <span className="text-xs font-black text-emerald-500 uppercase tracking-tighter">
-              {dailyHadith.hadith?.grades?.[0]?.grade || "Authentic Sahih"}
-            </span>
+        <div className="flex items-center justify-between pt-8 border-t border-white/5 gap-4">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[9px] text-zinc-600 font-black uppercase tracking-[0.2em]">Authentication</span>
+            <div className="flex items-center gap-2">
+               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+               <span className="text-xs font-black text-emerald-500 uppercase tracking-tight">
+                {dailyHadith.hadith?.grades?.[0]?.grade || "Authentic Sahih"}
+               </span>
+            </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2.5">
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-10 w-10 rounded-2xl text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="h-11 w-11 rounded-2xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all border border-white/5 backdrop-blur-xl"
               onClick={handleRefresh}
               title="New Hadith"
             >
@@ -116,7 +120,7 @@ export function HadithCard() {
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-10 w-10 rounded-2xl text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="h-11 w-11 rounded-2xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all border border-white/5 backdrop-blur-xl"
               onClick={handleShare}
               title="Share Wisdom"
             >
