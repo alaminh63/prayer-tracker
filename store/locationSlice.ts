@@ -21,24 +21,37 @@ const initialState: LocationState = {
 export const fetchLocation = createAsyncThunk(
   "location/fetchLocation",
   async (_, { rejectWithValue }) => {
-    if (!navigator.geolocation) {
+    if (typeof window === "undefined" || !navigator.geolocation) {
       return rejectWithValue("Geolocation is not supported by this browser")
     }
 
-    return new Promise<{ latitude: number; longitude: number }>((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          })
-        },
-        (error) => {
-          reject(rejectWithValue(error.message))
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 }
-      )
-    })
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 600000,
+        })
+      })
+
+      const { latitude, longitude } = position.coords
+
+      // Reverse Geocoding to get City Name
+      let city = "Unknown Location"
+      try {
+        const res = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+        )
+        const data = await res.json()
+        city = data.city || data.locality || data.principalSubdivision || "Unknown Location"
+      } catch (err) {
+        console.error("Reverse geocoding failed:", err)
+      }
+
+      return { latitude, longitude, city }
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Failed to get location")
+    }
   }
 )
 
@@ -69,6 +82,7 @@ const locationSlice = createSlice({
         state.loading = false
         state.latitude = action.payload.latitude
         state.longitude = action.payload.longitude
+        state.city = action.payload.city
         state.permissionDenied = false
       })
       .addCase(fetchLocation.rejected, (state, action) => {

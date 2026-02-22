@@ -1,43 +1,37 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-import { useAppSelector, useAppDispatch } from "@/store/hooks"
-import { fetchMonthlyPrayerTimes } from "@/store/prayerSlice"
+import React from "react"
+import { useAppSelector } from "@/store/hooks"
 import { cn } from "@/lib/utils"
-import { Sunrise, Sunset, Star, Moon, Heart, MapPin, BookOpen, Quote } from "lucide-react"
+import { Sunrise, Sunset, Star, Moon, MapPin, BookOpen, Quote, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
+import { formatTime12 } from "@/lib/prayer-utils"
+import { useHijriCalendar } from "@/hooks/use-calendar"
 
 export function RamadanCalendar() {
-  const dispatch = useAppDispatch()
   const { latitude, longitude, city } = useAppSelector((state) => state.location)
-  const { calculationMethod, asrMethod } = useAppSelector((state) => state.settings)
-  const { monthlyTimings, loading } = useAppSelector((state) => state.prayer)
+  const { calculationMethod } = useAppSelector((state) => state.settings)
   
-  useEffect(() => {
-    if (latitude && longitude && !monthlyTimings) {
-      dispatch(fetchMonthlyPrayerTimes({ 
-        latitude, 
-        longitude, 
-        method: calculationMethod, 
-        school: asrMethod 
-      }))
-    }
-  }, [latitude, longitude, calculationMethod, asrMethod, monthlyTimings, dispatch])
+  // Ramadan 2026 is 1447 AH
+  const hijriYear = 1447
+  const hijriMonth = 9 // Ramadan
+  
+  const { days: ramadanTimings, isLoading } = useHijriCalendar(
+    hijriYear,
+    hijriMonth,
+    latitude,
+    longitude,
+    calculationMethod
+  )
 
-  if (loading && !monthlyTimings) {
+  if (isLoading && ramadanTimings.length === 0) {
     return (
-      <div className="w-full space-y-8 animate-pulse">
-        <div className="h-64 bg-muted/20 rounded-4xl w-full" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-64 bg-muted/10 rounded-3xl w-full" />
-          ))}
-        </div>
+      <div className="w-full h-96 flex flex-col items-center justify-center gap-4">
+        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+        <p className="font-black text-muted-foreground uppercase">রমজানের সময়সূচী লোড হচ্ছে...</p>
       </div>
     )
   }
-
-  if (!monthlyTimings) return null
 
   const getAshra = (day: number) => {
      if (day <= 10) return { name: "রহমত", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" }
@@ -45,82 +39,90 @@ export function RamadanCalendar() {
      return { name: "নাজাত", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" }
   }
 
-  const today = new Date().getDate()
-  const todayMonth = new Date().getMonth() + 1
-  const todayYear = new Date().getFullYear()
+  const now = new Date()
+  const todayDate = now.getDate()
+  const todayMonth = now.getMonth() + 1
+  const todayYear = now.getFullYear()
   
+  const currentRamadanDay = ramadanTimings.find((day: any) => {
+    const d = day.date.gregorian
+    return parseInt(d.day) === todayDate && 
+           parseInt(d.month.number.toString()) === todayMonth && 
+           parseInt(d.year) === todayYear
+  })
+
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 md:space-y-12">
       {/* Hero Summary Section */}
-      <section className="relative overflow-hidden p-8 md:p-12 rounded-[2.5rem] bg-zinc-950/40 border border-white/10 backdrop-blur-3xl">
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex-1 space-y-4 text-center md:text-left">
-             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest">
+      <section className="relative overflow-hidden p-6 md:p-12 rounded-[2rem] md:rounded-[2.5rem] bg-card border border-border shadow-xl ring-1 ring-border">
+        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-8">
+          <div className="flex-1 space-y-4 text-center lg:text-left">
+             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase">
                 <MapPin size={14} />
                 {city || "Current Location"}
              </div>
-             <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
+             <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-foreground dark:text-white leading-tight">
                রমজান স্পেশাল <span className="text-gradient">২০২৬</span>
              </h1>
-             <p className="text-zinc-400 max-w-xl text-lg font-medium leading-relaxed">
+             <p className="text-muted-foreground max-w-xl text-base md:text-lg font-medium leading-relaxed">
                আপনার অবস্থানের সঠিক সেহরি ও ইফতারের সময় এবং রমজানের গুরুত্বপূর্ণ আমলসমূহ এখানে পাবেন ইনশাআল্লাহ।
              </p>
           </div>
           
-          <div className="flex gap-4">
-             <div className="p-8 rounded-4xl bg-white/5 border border-white/5 backdrop-blur-xl text-center min-w-[160px]">
-                <Moon className="h-8 w-8 text-primary mx-auto mb-3" />
-                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">আজকের রমজান</p>
-                <h3 className="text-3xl font-black text-white">১লা</h3>
+          <div className="grid grid-cols-2 sm:flex gap-3 md:gap-4 w-full lg:w-auto">
+             <div className="p-5 md:p-8 rounded-3xl md:rounded-4xl bg-secondary border border-border shadow-inner text-center flex-1 lg:min-w-[160px]">
+                <Moon className="h-6 w-6 md:h-8 md:w-8 text-primary mx-auto mb-2 md:mb-3" />
+                <p className="text-[10px] md:text-xs font-black text-muted-foreground uppercase">আজকের রমজান</p>
+                <h3 className="text-xl md:text-3xl font-black text-foreground dark:text-white">{currentRamadanDay ? `${currentRamadanDay.date.hijri.day}ই` : "---"}</h3>
              </div>
-             <div className="p-8 rounded-4xl bg-primary/10 border border-primary/20 backdrop-blur-xl text-center min-w-[160px]">
-                <Sunrise className="h-8 w-8 text-amber-500 mx-auto mb-3" />
-                <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest">বর্তমান আশরা</p>
-                <h3 className="text-3xl font-black text-primary">রহমত</h3>
+             <div className="p-5 md:p-8 rounded-3xl md:rounded-4xl bg-primary/10 border border-primary/20 text-center flex-1 lg:min-w-[160px]">
+                <Sunrise className="h-6 w-6 md:h-8 md:w-8 text-amber-500 mx-auto mb-2 md:mb-3" />
+                <p className="text-[10px] md:text-xs font-black text-primary/60 uppercase">বর্তমান আশরা</p>
+                <h3 className="text-xl md:text-3xl font-black text-primary">{currentRamadanDay ? getAshra(parseInt(currentRamadanDay.date.hijri.day)).name : "আসছে"}</h3>
              </div>
           </div>
         </div>
         
         {/* Background Decor */}
-        <div className="absolute top-0 right-0 h-96 w-96 bg-primary/20 blur-[120px] rounded-full -mr-48 -mt-48" />
-        <div className="absolute bottom-0 left-0 h-96 w-96 bg-emerald-500/10 blur-[120px] rounded-full -ml-48 -mb-48" />
+        <div className="absolute top-0 right-0 h-64 md:h-96 w-64 md:w-96 bg-primary/20 blur-[80px] md:blur-[120px] rounded-full -mr-32 -mt-32 md:-mr-48 md:-mt-48" />
+        <div className="absolute bottom-0 left-0 h-64 md:h-96 w-64 md:w-96 bg-emerald-500/10 blur-[80px] md:blur-[120px] rounded-full -ml-32 -mb-32 md:-ml-48 md:-mb-48" />
       </section>
 
       {/* Ramadan Duas Section */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         <div className="group relative overflow-hidden p-8 rounded-4xl bg-zinc-950/40 border border-white/10 hover:border-primary/30 transition-all duration-500">
-            <div className="flex items-center gap-4 mb-6">
-               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                  <BookOpen size={24} />
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+         <div className="group relative overflow-hidden p-6 md:p-8 rounded-3xl md:rounded-4xl bg-card border border-border shadow-sm hover:border-primary/30 transition-all duration-500 ring-1 ring-border">
+            <div className="flex items-center gap-4 mb-4 md:mb-6">
+               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                  <BookOpen size={20} />
                </div>
-               <h3 className="text-2xl font-black text-white">রোজার নিয়ত</h3>
+               <h3 className="text-xl md:text-2xl font-black text-foreground dark:text-white">রোজার নিয়ত</h3>
             </div>
             <div className="space-y-4">
-               <p className="text-xl font-serif text-zinc-300 leading-relaxed text-right md:text-left" dir="rtl">
-                 نَوَيْتُ اَنْ اَصُوْمَ غَدًا مِّنْ شَهْرِ رَمْضَانَ الْمُبَارَكِ فَرْضًا لَّكَ يَا اَللهُ فَتَقَبَّلْ مِنِّى اِنَّكَ اَنْتَ السَّمِيْعُ الْعَلِيْمُ
+               <p className="text-lg md:text-xl font-serif text-zinc-300 leading-relaxed text-right md:text-left" dir="rtl">
+                 نَوَيْتُ أَنْ أَصُومَ غَدًا مِّنْ شَهْرِ رَمَضَانَ الْمُبَارَكِ فَرْضًا لَّكَ يَا اللهُ فَتَقَبَّلْ مِنِّي إِنَّكَ أَنْته السَّمِيْعُ الْعَلِيْمُ
                </p>
-               <div className="pt-4 border-t border-white/5">
-                  <p className="text-sm text-zinc-400 leading-relaxed italic">
+               <div className="pt-4 border-t border-border">
+                  <p className="text-sm text-muted-foreground leading-relaxed italic">
                     "হে আল্লাহ! আমি আগামীকাল পবিত্র রমজান মাসের তোমার পক্ষ থেকে নির্ধারিত ফরজ রোজা রাখার নিয়ত করছি। অতএব তুমি আমার পক্ষ থেকে তা কবুল কর। নিশ্চয়ই তুমি সর্বশ্রোতা ও সর্বজ্ঞ।"
                   </p>
                </div>
             </div>
          </div>
 
-         <div className="group relative overflow-hidden p-8 rounded-4xl bg-zinc-950/40 border border-white/10 hover:border-primary/30 transition-all duration-500">
-            <div className="flex items-center gap-4 mb-6">
-               <div className="h-12 w-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
-                  <Sunset size={24} />
+         <div className="group relative overflow-hidden p-6 md:p-8 rounded-3xl md:rounded-4xl bg-card border border-border shadow-sm hover:border-primary/30 transition-all duration-500 ring-1 ring-border">
+            <div className="flex items-center gap-4 mb-4 md:mb-6">
+               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                  <Sunset size={20} />
                </div>
-               <h3 className="text-2xl font-black text-white">ইফতারের দোয়া</h3>
+               <h3 className="text-xl md:text-2xl font-black text-foreground dark:text-white">ইফতারের দোয়া</h3>
             </div>
             <div className="space-y-4">
-               <p className="text-xl font-serif text-zinc-300 leading-relaxed text-right md:text-left" dir="rtl">
-                 اَللَّهُمَّ لَكَ صُمْتُ وَعَلَى رِزْقِكَ اَفْطَرْتُ
+               <p className="text-lg md:text-xl font-serif text-zinc-300 leading-relaxed text-right md:text-left" dir="rtl">
+                 اَللَّهُمَّ لَكَ صُمْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ
                </p>
-               <div className="pt-4 border-t border-white/5">
-                  <p className="text-sm text-zinc-400 leading-relaxed italic">
-                    "হে আল্লাহ! আমি তোমারই সন্তুষ্টির জন্য রোজা রেখেছি এবং তোমারই দেয়া রিযিক দিয়ে ইফতার করছি।"
+               <div className="pt-4 border-t border-border">
+                  <p className="text-sm text-muted-foreground leading-relaxed italic">
+                    "হে আল্লাহ! আমি তোমারই সন্তুষ্টির জন্য রোজা রেখেছি এবং তোমারই দেয়া রিযিক দিয়ে ইফতার করছি."
                   </p>
                </div>
             </div>
@@ -128,114 +130,162 @@ export function RamadanCalendar() {
       </section>
 
       {/* Daily Schedule Section */}
-      <section className="space-y-8">
+      <section className="space-y-6 md:space-y-8">
         <div className="flex items-center justify-between px-2">
-           <h2 className="text-3xl font-black text-white flex items-center gap-3">
-              <Star className="text-primary fill-primary/20" />
+           <h2 className="text-2xl md:text-3xl font-black text-foreground dark:text-white flex items-center gap-3">
+              <Star className="text-primary fill-primary/20" size={24} />
               রমজানের সময়সূচী
            </h2>
-           <div className="hidden md:flex gap-4">
+           <div className="hidden lg:flex gap-4">
              {["রহমত", "মাগফিরাত", "নাজাত"].map((name, i) => (
                 <div key={i} className="flex items-center gap-2">
                    <div className={cn("h-2 w-2 rounded-full", i===0?"bg-emerald-500":i===1?"bg-sky-500":"bg-amber-500")} />
-                   <span className="text-[10px] font-black uppercase text-zinc-500">{name}</span>
+                   <span className=" font-black uppercase text-[10px] ">{name}</span>
                 </div>
              ))}
            </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {monthlyTimings.map((day: any, index: number) => {
-            const ramadanDay = index + 1
-            const ashra = getAshra(ramadanDay)
-            const isToday = parseInt(day.date.gregorian.day) === today && 
-                        parseInt(day.date.gregorian.month.number.toString()) === todayMonth &&
-                        parseInt(day.date.gregorian.year) === todayYear;
-            
-            return (
-              <motion.div 
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={cn(
-                  "relative overflow-hidden p-6 rounded-4xl border transition-all duration-500 group",
-                  isToday 
-                    ? "bg-primary/15 border-primary/40 shadow-2xl shadow-primary/10 ring-1 ring-primary/20" 
-                    : "bg-zinc-950/40 border-white/5 hover:border-white/10 hover:bg-zinc-900/60"
-                )}
-              >
-                <div className="flex justify-between items-start mb-6">
-                  <div className={cn("px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border", ashra.bg, ashra.color, ashra.border)}>
-                    {ramadanDay} রমজান • {ashra.name}
-                  </div>
-                  {isToday && (
-                    <div className="flex items-center gap-2">
-                       <span className="text-[8px] font-black text-primary uppercase animate-pulse">আজ</span>
-                       <div className="h-2 w-2 rounded-full bg-primary" />
-                    </div>
-                  )}
-                </div>
+        <div className="overflow-hidden rounded-3xl md:rounded-[2.5rem] bg-card border border-border shadow-xl ring-1 ring-border">
+           {/* Table Header */}
+           <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-5 bg-secondary font-black uppercase text-muted-foreground border-b border-border">
+              <div className="col-span-1">রমজান</div>
+              <div className="col-span-3">তারিখ ও দিন</div>
+              <div className="col-span-2">সেহরি শেষ</div>
+              <div className="col-span-2 text-primary">ইফতার শুরু</div>
+              <div className="col-span-2">আশরা</div>
+              <div className="col-span-2 text-right">অবস্থা</div>
+           </div>
 
-                <div className="flex items-end justify-between mb-8">
-                  <div>
-                    <h3 className="text-4xl font-black text-white tabular-nums tracking-tighter">{day.date.gregorian.day}</h3>
-                    <p className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">
-                      {day.date.gregorian.month.en} • {day.date.gregorian.weekday.en}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                     <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">হিজরি</p>
-                     <p className="text-sm font-bold text-white">{day.date.hijri.day} {day.date.hijri.month.en}</p>
-                  </div>
-                </div>
+           <div className="divide-y divide-border">
+              {ramadanTimings?.map((day: any, index: number) => {
+                const ramadanDay = parseInt(day.date.hijri.day)
+                const ashra = getAshra(ramadanDay)
+                const isToday = parseInt(day.date.gregorian.day) === todayDate && 
+                            parseInt(day.date.gregorian.month.number.toString()) === todayMonth &&
+                            parseInt(day.date.gregorian.year) === todayYear;
+                
+                // Show Ashra Header
+                const showAshraHeader = ramadanDay === 1 || ramadanDay === 11 || ramadanDay === 21;
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:bg-white/10 transition-colors">
-                     <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
-                           <Sunrise size={16} />
+                return (
+                  <React.Fragment key={index}>
+                    {showAshraHeader && (
+                      <div className={cn("px-6 md:px-8 py-3 bg-secondary flex items-center gap-3", ashra.bg)}>
+                        <div className={cn("h-1.5 w-1.5 md:h-2 md:w-2 rounded-full animate-pulse", ashra.color.replace('text-', 'bg-'))} />
+                        <span className={cn("text-[10px] md:text-xs font-black uppercase", ashra.color)}>
+                          {ashra.name} এর ১০ দিন
+                        </span>
+                      </div>
+                    )}
+                    
+                    <motion.div 
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      className={cn(
+                        "grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-center px-5 md:px-8 py-4 md:py-5 transition-all duration-300 group relative",
+                        isToday ? "bg-primary/10" : "hover:bg-muted/50"
+                      )}
+                    >
+                      {/* Mobile Layout (Visible only on small screens) */}
+                      <div className="md:hidden flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                           <span className="h-8 w-8 rounded-full bg-secondary border border-border flex items-center justify-center text-xs font-black text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                              {ramadanDay}
+                           </span>
+                           <div>
+                              <p className="text-sm font-black text-foreground dark:text-white">{day.date.gregorian.day} {day.date.gregorian.month.en.substring(0, 3)}</p>
+                              <p className="text-[10px] text-muted-foreground font-bold uppercase">{day.date.gregorian.weekday.en.substring(0, 3)}</p>
+                           </div>
                         </div>
-                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">সেহরি শেষ</span>
-                     </div>
-                     <p className="text-xl font-mono font-black text-white tabular-nums">
-                       {day.timings.Fajr.split(" ")[0]}
-                     </p>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
-                     <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
-                           <Sunset size={16} />
+                        <div className="flex items-center gap-4">
+                           <div className="text-right">
+                              <p className="text-[10px] font-black text-muted-foreground uppercase">ইফতার</p>
+                              <p className="text-base font-mono font-black text-primary">
+                                 {formatTime12(day.timings.Maghrib.split(" ")[0])}
+                              </p>
+                           </div>
+                           {isToday && <div className="h-8 w-1 bg-primary rounded-full shadow-[0_0_10px_rgba(255,107,0,0.5)]" />}
                         </div>
-                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">ইফতার শুরু</span>
-                     </div>
-                     <p className="text-xl font-mono font-black text-primary tabular-nums">
-                       {day.timings.Maghrib.split(" ")[0]}
-                     </p>
-                  </div>
-                </div>
+                      </div>
 
-                {isToday && (
-                  <div className="absolute -top-12 -right-12 h-40 w-40 bg-primary/20 blur-3xl rounded-full opacity-50" />
-                )}
-              </motion.div>
-            )
-          })}
+                      <div className="hidden md:block col-span-1 font-black text-lg text-muted-foreground group-hover:text-primary transition-colors">
+                        {ramadanDay}
+                      </div>
+
+                      <div className="hidden md:block col-span-3">
+                        <p className="text-sm font-black text-foreground dark:text-white">{day.date.gregorian.day} {day.date.gregorian.month.en}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase">{day.date.gregorian.weekday.en}</p>
+                      </div>
+
+                      <div className="hidden md:flex col-span-2 items-center gap-3">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-lg font-mono font-black text-foreground dark:text-white tracking-tighter">
+                            {formatTime12(day.timings.Fajr.split(" ")[0])}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="hidden md:flex col-span-2 items-center gap-3">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-xl font-mono font-black text-primary tracking-tighter">
+                            {formatTime12(day.timings.Maghrib.split(" ")[0])}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Mobile secondary info row */}
+                      <div className="md:hidden flex items-center justify-between text-[10px] font-bold border-t border-border pt-2 mt-1">
+                         <div className="flex items-center gap-2 text-muted-foreground uppercase">
+                            <span>সেহরি শেষ:</span>
+                            <span className="text-foreground dark:text-white font-mono">{formatTime12(day.timings.Fajr.split(" ")[0])}</span>
+                         </div>
+                         <div className={cn("px-2 py-0.5 rounded-full border", ashra.bg, ashra.color, ashra.border)}>
+                             {ashra.name}
+                         </div>
+                      </div>
+
+                      <div className="hidden md:block col-span-2">
+                        <span className={cn("text-xs font-black uppercase px-3 py-1 rounded-full border", ashra.bg, ashra.color, ashra.border)}>
+                          {ashra.name}
+                        </span>
+                      </div>
+
+                      <div className="hidden md:block col-span-2 text-right">
+                        {isToday ? (
+                          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-[10px] font-black text-white rounded-lg shadow-lg shadow-primary/20">
+                             <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                             চলমান
+                          </div>
+                        ) : (
+                          <span className="text-[10px] font-black  uppercase">
+                             {currentRamadanDay && ramadanDay < parseInt(currentRamadanDay.date.hijri.day) ? "সম্পন্ন" : "আসছে"}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Today indicator line */}
+                      {isToday && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_15px_rgba(255,107,0,0.5)] hidden md:block" />}
+                    </motion.div>
+                  </React.Fragment>
+                )
+              })}
+           </div>
         </div>
       </section>
       
       {/* Footer Info */}
-      <footer className="p-8 rounded-[2rem] bg-zinc-950/20 border border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+      <footer className="p-6 md:p-8 rounded-3xl md:rounded-4xl bg-secondary border border-border flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left shadow-sm ring-1 ring-border">
          <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-               <Quote size={18} />
+            <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+               <Quote size={20} />
             </div>
-            <p className="max-w-md text-sm text-zinc-400 italic font-medium">
+            <p className="max-w-md text-xs md:text-sm text-muted-foreground italic font-medium">
               "রোজা ঢাল স্বরূপ, সুতরাং রোজা পালনকারী যেন অশ্লীল কথা না বলে এবং জাহেলী আচরণ না করে।" - (বুখারী ও মুসলিম)
             </p>
          </div>
-         <div className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">
+         <div className="text-[10px] font-black text-muted-foreground/40 uppercase">
             Provided by Aladhan • Accurate for {city || "your current location"}
          </div>
       </footer>

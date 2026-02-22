@@ -6,6 +6,7 @@ import {
   PRAYER_LABELS,
   PRAYER_ARABIC,
   parseTimeString,
+  formatTime12,
   type PrayerName,
 } from "@/lib/prayer-utils"
 import { cn } from "@/lib/utils"
@@ -72,8 +73,6 @@ export function PrayerDetailList() {
       {allTimes.map((prayer) => {
         const timeDate = parseTimeString(prayer.time)
         const isPast = new Date() > timeDate && !prayer.isCurrent
-        const period = timeDate.getHours() >= 12 ? "PM" : "AM"
-        const hours12 = timeDate.getHours() % 12 || 12
 
         return (
           <div
@@ -130,9 +129,8 @@ export function PrayerDetailList() {
                     prayer.isNext ? "text-primary" : "text-card-foreground"
                   )}
                 >
-                  {`${hours12}:${timeDate.getMinutes().toString().padStart(2, "0")}`}
+                  {formatTime12(prayer.time)}
                 </p>
-                <p className="text-xs text-muted-foreground">{period}</p>
               </div>
             </div>
             {prayer.isNext && (

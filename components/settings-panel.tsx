@@ -239,63 +239,6 @@ export function SettingsPanel() {
         </div>
       </section>
 
-      {/* Advanced Settings */}
-      <section className="glass-card rounded-2xl p-5">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4 flex items-center gap-2">
-          <Calculator className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-          {t.settings.asr_method}
-        </h2>
-        
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <Label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">{t.settings.asr_method}</Label>
-            <Select
-              value={settings.asrMethod.toString()}
-              onValueChange={(value) =>
-                dispatch(setAsrMethod(parseInt(value) as 0 | 1))
-              }
-            >
-              <SelectTrigger className="bg-secondary/50 border-border text-foreground">
-                <SelectValue placeholder="Select school" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0">{t.settings.asr_standard}</SelectItem>
-                <SelectItem value="1">{t.settings.asr_hanafi}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-3">
-            <Label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">{t.settings.hijri_offset}</Label>
-            <div className="flex items-center gap-2">
-              {[-2, -1, 0, 1, 2].map((offset) => (
-                <button
-                  key={offset}
-                  onClick={() => dispatch(setHijriOffset(offset))}
-                  className={cn(
-                    "flex-1 py-2 rounded-xl text-xs font-bold border transition-all",
-                    settings.hijriOffset === offset 
-                      ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20" 
-                      : "bg-secondary/50 border-border text-foreground hover:bg-secondary"
-                  )}
-                >
-                  {offset > 0 ? `+${offset}` : offset}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-2 mt-4 text-[11px] text-muted-foreground">
-          <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden="true" />
-          <p className="leading-relaxed">
-            {settings.language === "bn" 
-              ? "বিভিন্ন অঞ্চলে নামাজের ওয়াক্ত গণনার জন্য আলাদা আলাদা পদ্ধতি ব্যবহার করা হয়। আপনার এলাকার জন্য উপযুক্ত পদ্ধতিটি বেছে নিন।"
-              : "Different regions use different calculation methods for prayer times. Choose the one most appropriate for your area."
-            }
-          </p>
-        </div>
-      </section>
 
       {/* Appearance Settings */}
       <section className="glass-card rounded-2xl p-5">
@@ -324,13 +267,10 @@ export function SettingsPanel() {
 
       {/* App Info */}
       <section className="glass-card rounded-2xl p-5 text-center">
-        <p className="text-sm font-semibold text-foreground">Salat Time</p>
-        <p className="text-[11px] text-muted-foreground mt-1">{settings.language === "bn" ? "ভার্সন ২.০" : "Version 2.0"}</p>
+        <p className="text-sm font-black text-foreground">CloudGen</p>
+        <p className="text-[11px] text-muted-foreground mt-1">{t.settings.version}</p>
         <p className="text-[11px] text-muted-foreground mt-2">
-          {settings.language === "bn" 
-            ? "নামাজের ওয়াক্তসমূহ Aladhan API দ্বারা পরিচালিত"
-            : "Prayer times powered by Aladhan API"
-          }
+          {t.settings.built_by}
         </p>
       </section>
     </div>

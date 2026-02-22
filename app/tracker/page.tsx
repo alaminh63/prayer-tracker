@@ -4,70 +4,73 @@ import React from "react"
 import { AppShell } from "@/components/app-shell"
 import { PageHeader } from "@/components/page-header"
 import { DeedsTracker } from "@/components/deeds-tracker"
-import { Activity, Sparkles, Heart, ShieldCheck, Target, Award } from "lucide-react"
+import { TrackingHistoryCalendar } from "@/components/tracking-history-calendar"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Activity, Sparkles, Heart, ShieldCheck, Target, Award, LayoutDashboard, History } from "lucide-react"
+import { useTranslation } from "@/hooks/use-translation"
 
 export default function TrackerPage() {
+  const { t } = useTranslation()
   return (
     <AppShell>
       <PageHeader 
-        title={<span className="text-gradient">আমল ও ইবাদত ট্র্যাকার</span>} 
-        subtitle="আপনার প্রতিদিনের নেক আমলগুলো সংরক্ষণ করুন এবং ধারাবাহিকতা বজায় রাখুন" 
+        title={<span className="text-gradient">{t.tracker.title}</span>} 
+        subtitle={t.tracker.subtitle} 
       />
 
-      <div className="px-4 lg:px-8 pb-20 flex flex-col gap-16 w-full">
-        {/* Main Tracker */}
-        <section className="w-full">
-          <DeedsTracker />
-        </section>
+      <div className="px-4 lg:px-8 pb-20 flex flex-col gap-10 w-full mx-auto">
+        
+        <Tabs defaultValue="overview" className="w-full">
+          <div className="flex justify-center mb-10">
+            <TabsList className="bg-secondary border border-border p-1.5 rounded-2xl h-auto backdrop-blur-xl ring-1 ring-border">
+              <TabsTrigger value="overview" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-500 gap-2 text-muted-foreground">
+                <LayoutDashboard size={18} />
+                <span className="font-black uppercase  ">{t.tracker.today_deeds}</span>
+              </TabsTrigger>
+              <TabsTrigger value="history" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-500 gap-2 text-muted-foreground">
+                <History size={18} />
+                <span className="font-black uppercase  ">{t.tracker.history}</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="overview" className="mt-0 focus-visible:outline-hidden">
+            <div className="grid grid-cols-1 gap-10">
+              <DeedsTracker />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="history" className="mt-0 focus-visible:outline-hidden">
+            <div className="grid grid-cols-1 gap-10">
+              <TrackingHistoryCalendar fullWidth />
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Stats / Info Section */}
         <section className="width-full grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="p-8 rounded-4xl bg-zinc-950/40 border border-white/5 flex flex-col items-center text-center gap-4">
+           <div className="p-8 rounded-4xl bg-card border border-border flex flex-col items-center text-center gap-4 shadow-sm">
               <div className="h-12 w-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500">
                 <Activity size={24} />
               </div>
-              <h3 className="text-xl font-black text-white">নিয়মিত ট্র্যাকিং</h3>
-              <p className="text-sm text-zinc-500">আপনার প্রতিদিনের আমল এবং নামাজ ট্র্যাক করুন সহজেই।</p>
+              <h3 className="text-xl font-black text-foreground dark:text-white">{t.tracker.regular_tracking}</h3>
+              <p className="text-sm text-muted-foreground">{t.tracker.regular_desc}</p>
            </div>
            
-           <div className="p-8 rounded-4xl bg-zinc-950/40 border border-white/5 flex flex-col items-center text-center gap-4">
+           <div className="p-8 rounded-4xl bg-card border border-border flex flex-col items-center text-center gap-4 shadow-sm">
               <div className="h-12 w-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500">
                 <Sparkles size={24} />
               </div>
-              <h3 className="text-xl font-black text-white">আধ্যাত্মিক প্রগতি</h3>
-              <p className="text-sm text-zinc-500">প্রতিটি আমল আপনার আত্মিক উন্নতির একটি ধাপ।</p>
+              <h3 className="text-xl font-black text-foreground dark:text-white">{t.tracker.spiritual_progress}</h3>
+              <p className="text-sm text-muted-foreground">{t.tracker.progress_desc}</p>
            </div>
 
-           <div className="p-8 rounded-4xl bg-primary/5 border border-primary/20 flex flex-col items-center text-center gap-4">
+           <div className="p-8 rounded-4xl bg-primary/5 border border-primary/20 flex flex-col items-center text-center gap-4 shadow-xs">
               <div className="h-12 w-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                 <Heart size={24} />
               </div>
-              <h3 className="text-xl font-black text-white">ইকলাস ও একাগ্রতা</h3>
-              <p className="text-sm text-zinc-500">আল্লাহর সন্তুষ্টির জন্য ইখলাসের সাথে আমল বজায় রাখুন।</p>
-           </div>
-
-           <div className="p-8 rounded-4xl bg-zinc-950/40 border border-white/5 flex flex-col items-center text-center gap-4">
-              <div className="h-12 w-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500">
-                <ShieldCheck size={24} />
-              </div>
-              <h4 className="font-bold text-white">গোপনীয়তা</h4>
-              <p className="text-xs text-zinc-500">আপনার সমস্ত ডাটা সুরক্ষিত এবং ব্যক্তিগতভাবে সংরক্ষিত থাকে।</p>
-           </div>
-
-           <div className="p-8 rounded-4xl bg-zinc-950/40 border border-white/5 flex flex-col items-center text-center gap-4">
-              <div className="h-12 w-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
-                <Target size={24} />
-              </div>
-              <h4 className="font-bold text-white">লক্ষ্য নির্ধারণ</h4>
-              <p className="text-xs text-zinc-500">প্রতিদিন শতভাগ সম্পন্ন করার লক্ষ্য রাখুন এবং নিজের ইবাদতকে শানিত করুন।</p>
-           </div>
-
-           <div className="p-8 rounded-4xl bg-zinc-950/40 border border-white/5 flex flex-col items-center text-center gap-4">
-              <div className="h-12 w-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500">
-                <Award size={24} />
-              </div>
-              <h4 className="font-bold text-white">ধারাবাহিকতা</h4>
-              <p className="text-xs text-zinc-500">"আল্লাহর কাছে সবচেয়ে প্রিয় আমল তা-ই, যা বিরতিহীনভাবে করা হয়।"</p>
+              <h3 className="text-xl font-black text-foreground dark:text-white">{t.tracker.ikhlas}</h3>
+              <p className="text-sm text-muted-foreground">{t.tracker.ikhlas_desc}</p>
            </div>
         </section>
       </div>

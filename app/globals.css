@@ -156,6 +156,9 @@
   .text-glow-teal {
     text-shadow: 0 0 20px var(--glow-teal);
   }
+  .font-arabic {
+    font-family: var(--font-amiri), 'Amiri', 'Noto Naskh Arabic', 'Segoe UI Arabic', 'Arial', serif;
+  }
 }
 
 @keyframes pulse-subtle {

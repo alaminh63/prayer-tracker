@@ -5,6 +5,7 @@ import {
   PRAYER_NAMES,
   PRAYER_LABELS,
   PRAYER_ARABIC,
+  formatTime12,
   type PrayerName,
 } from "@/lib/prayer-utils"
 import { Clock } from "lucide-react"
@@ -129,7 +130,7 @@ export function PrayerCard() {
                       : "text-card-foreground/80"
                 )}
               >
-                {timings[name]}
+                {formatTime12(timings[name])}
               </span>
             </div>
           </div>

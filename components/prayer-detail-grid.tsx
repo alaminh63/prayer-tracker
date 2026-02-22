@@ -6,6 +6,7 @@ import {
   PRAYER_LABELS,
   PRAYER_ARABIC,
   parseTimeString,
+  formatTime12,
   type PrayerName,
 } from "@/lib/prayer-utils"
 import { cn } from "@/lib/utils"
@@ -21,7 +22,7 @@ export function PrayerDetailGrid() {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="h-40 rounded-3xl bg-white/5 animate-pulse border border-white/5" />
+          <div key={i} className="h-40 rounded-3xl bg-muted animate-pulse border border-border" />
         ))}
       </div>
     )
@@ -55,9 +56,6 @@ export function PrayerDetailGrid() {
       {allItems.map((prayer, index) => {
         const timeDate = parseTimeString(prayer.time)
         const isPast = new Date() > timeDate && !prayer.isCurrent
-        const hours12 = timeDate.getHours() % 12 || 12
-        const minutes = timeDate.getMinutes().toString().padStart(2, "0")
-        const period = timeDate.getHours() >= 12 ? "PM" : "AM"
 
         return (
           <motion.div
@@ -72,8 +70,8 @@ export function PrayerDetailGrid() {
                 : prayer.isCurrent
                   ? "bg-accent/10 border-accent/30 shadow-xl shadow-accent/5 ring-1 ring-accent/20"
                   : isPast
-                    ? "bg-zinc-900/40 border-white/5 opacity-60 grayscale-[0.5]"
-                    : "bg-zinc-950/40 border-white/5 hover:border-white/10 hover:bg-zinc-900/60"
+                    ? "bg-muted/50 border-border opacity-70 grayscale-[0.3]"
+                    : "bg-card border-border hover:bg-muted/50"
             )}
           >
             {/* Background Accent */}
@@ -89,8 +87,8 @@ export function PrayerDetailGrid() {
                   prayer.isNext 
                     ? "bg-primary/20 border-primary/40 text-primary rotate-3 group-hover:rotate-6" 
                     : prayer.isCurrent
-                      ? "bg-accent/20 border-accent/40 text-accent"
-                      : "bg-white/5 border-white/10 text-zinc-500"
+                        ? "bg-accent/20 border-accent/40 text-accent"
+                      : "bg-muted/50 border-border text-muted-foreground"
                 )}>
                   {prayer.isSunrise ? <Sunrise size={24} /> : <span className="text-xl font-black">{prayer.label.charAt(0)}</span>}
                 </div>
@@ -98,11 +96,11 @@ export function PrayerDetailGrid() {
                 <div>
                   <h3 className={cn(
                     "text-lg font-black tracking-tight",
-                    prayer.isNext ? "text-primary" : prayer.isCurrent ? "text-accent" : "text-white"
+                    prayer.isNext ? "text-primary" : prayer.isCurrent ? "text-accent" : "text-foreground dark:text-white"
                   )}>
                     {prayer.label}
                   </h3>
-                  <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mt-0.5">
+                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
                     {prayer.arabic}
                   </p>
                 </div>
@@ -110,13 +108,10 @@ export function PrayerDetailGrid() {
 
               <div className="text-right">
                 <div className={cn(
-                  "text-3xl font-black tabular-nums tracking-tighter flex items-baseline gap-1",
-                  prayer.isNext ? "text-primary shadow-glow-gold" : "text-white"
+                  "text-3xl font-black tabular-nums tracking-tighter",
+                  prayer.isNext ? "text-primary shadow-glow-gold" : "text-foreground dark:text-white"
                 )}>
-                  {hours12}
-                  <span className="animate-pulse">:</span>
-                  {minutes}
-                  <span className="text-[10px] uppercase opacity-40 ml-0.5">{period}</span>
+                  {formatTime12(prayer.time)}
                 </div>
               </div>
             </div>
@@ -140,7 +135,7 @@ export function PrayerDetailGrid() {
 
                <button className={cn(
                  "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
-                 prayer.isNext || prayer.isCurrent ? "bg-zinc-800/80 text-white" : "bg-white/5 text-zinc-500 hover:text-zinc-300"
+                 prayer.isNext || prayer.isCurrent ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground hover:text-foreground"
                )}>
                  <Bell size={18} />
                </button>

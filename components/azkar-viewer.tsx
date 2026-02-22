@@ -60,7 +60,7 @@ function AzkarCard({ item }: { item: AzkarItem }) {
         )}
       </div>
 
-      <div className="bg-secondary/20 p-6 rounded-2xl flex flex-col items-end gap-3 text-right">
+      <div className="bg-secondary/50 p-6 rounded-2xl flex flex-col items-end gap-3 text-right">
         <p className="text-2xl font-serif leading-loose text-foreground">
           {item.arabic}
         </p>

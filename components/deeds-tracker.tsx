@@ -46,9 +46,11 @@ export function DeedsTracker() {
   const [allData, setAllData] = useState<any>({ salat: {}, morning: {}, evening: {}, night: {} })
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
+  const [streak, setStreak] = useState(0)
 
   useEffect(() => {
     fetchData()
+    fetchStreak()
   }, [date])
 
   const fetchData = async () => {
@@ -64,9 +66,40 @@ export function DeedsTracker() {
       })
     } catch (err) {
       console.error(err)
-      toast.error("তথ্য লোড করতে সমস্যা হয়েছে")
+      toast.error("정보 로드에 실패했습니다")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchStreak = async () => {
+    try {
+      const res = await fetch("/api/deeds/history?days=60")
+      const history = await res.json()
+      
+      let currentStreak = 0
+      const today = new Date().toISOString().split("T")[0]
+      const sortedHistory = history.sort((a: any, b: any) => b.date.localeCompare(a.date))
+      
+      // Basic streak logic: count consecutive days with at least 50% progress
+      for (const record of sortedHistory) {
+        if (record.date > today) continue;
+        
+        const salatCount = Object.values(record.salat || {}).filter(v => v).length
+        const totalCount = salatCount + 
+          Object.values(record.morning || {}).filter(v => v).length + 
+          Object.values(record.evening || {}).filter(v => v).length + 
+          Object.values(record.night || {}).filter(v => v).length
+        
+        if (totalCount >= 7) { // 50% of 14
+          currentStreak++
+        } else if (record.date !== today) {
+          break
+        }
+      }
+      setStreak(currentStreak)
+    } catch (err) {
+      console.error("Failed to fetch streak:", err)
     }
   }
 
@@ -88,6 +121,8 @@ export function DeedsTracker() {
         body: JSON.stringify({ date, id, category, status: newStatus })
       })
       if (!res.ok) throw new Error("Update failed")
+      // Re-fetch streak if daily goal might be met
+      fetchStreak()
     } catch (err) {
       console.error(err)
       toast.error("আপডেট করা সম্ভব হয়নি")
@@ -115,28 +150,34 @@ export function DeedsTracker() {
   }
 
   return (
-    <div className="flex flex-col gap-8  mx-auto pb-20">
+    <div className="flex flex-col gap-8 mx-auto pb-20 w-full">
       {/* Header & Date Picker */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-zinc-950/40 p-8 rounded-[2.5rem] border border-white/5 backdrop-blur-xl">
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-inner border border-primary/5">
-            <Trophy size={28} />
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-card p-8 rounded-[2.5rem] border border-border backdrop-blur-xl group ring-1 ring-border shadow-sm">
+        <div className="flex items-center gap-5">
+          <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-inner border border-primary/10 group-hover:scale-110 transition-transform duration-500">
+            <Trophy size={32} strokeWidth={2.5} />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-white">দৈনিক আমল ট্র্যাকার</h2>
-            <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1">আপনার ইবাদতের গ্রাফ উন্নত করুন</p>
+            <h2 className="text-2xl font-black text-foreground dark:text-white">দৈনিক আমল ট্র্যাকার</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[10px] text-primary font-black uppercase tracking-[0.2em] bg-primary/10 px-2 py-0.5 rounded shadow-sm">
+                Streak: {streak} Days
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-zinc-900/50 p-2 rounded-2xl border border-white/5">
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" onClick={() => navigateDate(-1)}>
+        <div className="flex items-center gap-3 bg-secondary p-2.5 rounded-2xl border border-border shadow-inner ring-1 ring-border">
+          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-muted transition-colors" onClick={() => navigateDate(-1)}>
             <ChevronLeft size={20} />
           </Button>
-          <div className="flex items-center gap-2 px-4 border-x border-white/5">
-            <CalendarIcon size={16} className="text-primary" />
-            <span className="text-sm font-black text-white">{date === new Date().toISOString().split("T")[0] ? "আজ" : date}</span>
+          <div className="flex items-center gap-3 px-6 border-x border-border">
+            <CalendarIcon size={18} className="text-primary" />
+            <span className="text-sm font-black text-foreground dark:text-white tracking-tight">
+              {date === new Date().toISOString().split("T")[0] ? "আজকের আমলনামা" : date}
+            </span>
           </div>
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" onClick={() => navigateDate(1)}>
+          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-muted transition-colors" onClick={() => navigateDate(1)}>
             <ChevronRight size={20} />
           </Button>
         </div>
@@ -155,8 +196,8 @@ export function DeedsTracker() {
               className={cn(
                 "relative group flex flex-col p-6 rounded-4xl border transition-all overflow-hidden",
                 isActive 
-                  ? "bg-zinc-900 border-primary/40 shadow-2xl scale-[1.02]" 
-                  : "bg-zinc-950/40 border-white/5 hover:border-white/10"
+                  ? "bg-secondary border-primary/40 shadow-2xl scale-[1.02]" 
+                  : "bg-card border-border hover:border-primary/20 shadow-sm"
               )}
             >
               <div className={cn(
@@ -167,7 +208,7 @@ export function DeedsTracker() {
               <div className="relative z-10 flex flex-col gap-4">
                 <div className={cn(
                   "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
-                  isActive ? "bg-primary text-white scale-110 shadow-lg" : "bg-white/5 text-zinc-400 group-hover:text-primary"
+                  isActive ? "bg-primary text-white scale-110 shadow-lg" : "bg-muted text-muted-foreground group-hover:text-primary"
                 )}>
                   <cat.icon size={20} />
                 </div>
@@ -175,15 +216,15 @@ export function DeedsTracker() {
                 <div className="text-left">
                   <h3 className={cn(
                     "font-black text-lg",
-                    isActive ? "text-white" : "text-zinc-400"
+                    isActive ? "text-foreground dark:text-white" : "text-muted-foreground"
                   )}>{cat.label}</h3>
                   <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-tighter mt-1">
-                    <span className={isActive ? "text-primary" : "text-zinc-600"}>{progress}%</span>
-                    <span className="text-zinc-600">সম্পন্ন</span>
+                    <span className={isActive ? "text-primary" : "text-muted-foreground"}>{progress}%</span>
+                    <span className="text-muted-foreground">সম্পন্ন</span>
                   </div>
                 </div>
                 
-                <Progress value={progress} className="h-1.5 bg-white/5" />
+                <Progress value={progress} className="h-1.5 bg-muted" />
               </div>
             </button>
           )
@@ -201,9 +242,9 @@ export function DeedsTracker() {
             className="flex flex-col gap-4"
           >
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div className="flex flex-col items-center justify-center py-20 gap-4 bg-muted/20 rounded-[2.5rem] border border-border">
                 <Loader2 size={40} className="text-primary animate-spin" />
-                <p className="text-zinc-500 font-bold">লোড হচ্ছে...</p>
+                <p className="text-muted-foreground font-black uppercase tracking-widest text-xs">লোড হচ্ছে...</p>
               </div>
             ) : (
               DEED_DEFINITIONS[activeTab].map((deed) => {
@@ -216,42 +257,42 @@ export function DeedsTracker() {
                     onClick={() => toggleDeed(activeTab, deed.id)}
                     disabled={loading || isUpdating}
                     className={cn(
-                      "group flex items-center justify-between p-6 rounded-4xl border transition-all text-left",
+                      "group flex items-center justify-between p-1 rounded-4xl border transition-all duration-500 text-left outline-hidden shadow-xs",
                       isCompleted 
-                        ? "bg-primary/20 border-primary/30 shadow-xl" 
-                        : "bg-zinc-950/40 border-white/5 hover:border-primary/20"
+                        ? "bg-primary/10 border-primary/30 shadow-2xl shadow-primary/5" 
+                        : "bg-card border-border hover:border-primary/20 hover:bg-muted/50"
                     )}
                   >
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-5 p-4">
                       <div className={cn(
-                        "h-14 w-14 rounded-2xl flex items-center justify-center transition-all border",
+                        "h-14 w-14 rounded-[1.5rem] flex items-center justify-center transition-all duration-500 border",
                         isCompleted 
-                          ? "bg-primary text-white border-primary shadow-lg scale-110" 
-                          : "bg-white/5 text-zinc-500 border-white/5 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20"
+                          ? "bg-primary text-white border-primary shadow-[0_0_20px_rgba(255,107,0,0.3)] scale-105" 
+                          : "bg-muted text-muted-foreground border-border group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20"
                       )}>
                         {isUpdating ? (
                           <Loader2 size={24} className="animate-spin" />
                         ) : isCompleted ? (
-                          <CheckCircle2 size={28} />
+                          <CheckCircle2 size={30} strokeWidth={2.5} />
                         ) : (
-                          <Circle size={28} />
+                          <Circle size={30} strokeWidth={2} className="opacity-40" />
                         )}
                       </div>
                       
                       <div>
                         <h4 className={cn(
-                          "text-xl font-black transition-colors font-inter",
-                          isCompleted ? "text-white" : "text-zinc-300 group-hover:text-primary"
+                          "text-xl font-black transition-colors",
+                          isCompleted ? "text-foreground dark:text-white" : "text-muted-foreground group-hover:text-primary"
                         )}>{deed.label}</h4>
-                        <p className="text-xs text-zinc-500 font-medium">{deed.desc}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-0.5">{deed.desc}</p>
                       </div>
                     </div>
 
                     <div className={cn(
-                      "h-10 px-6 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-all",
+                      "mr-6 h-10 px-8 rounded-2xl flex items-center justify-center text-[11px] font-black uppercase tracking-widest transition-all duration-500 shadow-sm",
                       isCompleted 
-                        ? "bg-primary text-white" 
-                        : "bg-white/5 text-zinc-500 group-hover:bg-primary/20 group-hover:text-primary"
+                        ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                        : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
                     )}>
                       {isCompleted ? "সম্পন্ন" : "মার্ক করুন"}
                     </div>
@@ -270,8 +311,8 @@ export function DeedsTracker() {
         </div>
         <div className="text-center md:text-left flex-1">
           <p className="text-indigo-400 font-black uppercase text-[10px] tracking-[0.3em] mb-2">Daily Motivation</p>
-          <h3 className="text-xl font-bold text-white mb-2 italic">"নামাজ মুমিনদের জন্য একটি নির্ধারিত সময়ের ইবাদত।"</h3>
-          <p className="text-sm text-zinc-500">প্রতিদিনের আমলগুলো আপনার আত্মিক শক্তি বৃদ্ধি করে। নিরবচ্ছিন্ন থাকার চেষ্টা করুন।</p>
+          <h3 className="text-xl font-bold text-foreground dark:text-white mb-2 italic">"নামাজ মুমিনদের জন্য একটি নির্ধারিত সময়ের ইবাদত।"</h3>
+          <p className="text-sm text-muted-foreground">প্রতিদিনের আমলগুলো আপনার আত্মিক শক্তি বৃদ্ধি করে। নিরবচ্ছিন্ন থাকার চেষ্টা করুন।</p>
         </div>
       </div>
     </div>

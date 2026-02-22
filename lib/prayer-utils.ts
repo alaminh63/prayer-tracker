@@ -95,3 +95,10 @@ export function getCurrentAndNextPrayer(
     timeLeft: tomorrowFajr.getTime() - now.getTime(),
   }
 }
+export function formatTime12(time: string): string {
+  if (!time) return "--:--"
+  const [hours24, minutes] = time.split(":").map(Number)
+  const period = hours24 >= 12 ? "PM" : "AM"
+  const hours12 = hours24 % 12 || 12
+  return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`
+}

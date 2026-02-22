@@ -118,7 +118,7 @@ export const GlobalAudioPlayer = () => {
       <div className="bg-card/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex flex-col gap-3">
         <audio
           ref={audioRef}
-          src={audioUrl || ""}
+          src={audioUrl || undefined}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={handleEnded}

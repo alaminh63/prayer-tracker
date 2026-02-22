@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useAppSelector } from "@/store/hooks"
 import { useTranslation } from "@/hooks/use-translation"
 import { Moon, Sun, Clock } from "lucide-react"
-import { getTimeDiff, formatCountdown } from "@/lib/prayer-utils"
+import { getTimeDiff, formatCountdown, formatTime12 } from "@/lib/prayer-utils"
 
 export function SehriIftarHero() {
   const { timings, loading } = useAppSelector((state) => state.prayer)
@@ -51,7 +51,7 @@ export function SehriIftarHero() {
               {t.prayers.sehri_ends}
             </p>
             <p className="text-xl font-black text-white font-mono tabular-nums tracking-tighter">
-              {timings.Fajr}
+              {formatTime12(timings.Fajr)}
             </p>
             {sehriDiff > 0 && (
               <div className="mt-2 flex items-center justify-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
@@ -75,7 +75,7 @@ export function SehriIftarHero() {
               {t.prayers.iftar_time}
             </p>
             <p className="text-xl font-black text-white font-mono tabular-nums tracking-tighter">
-              {timings.Maghrib}
+              {formatTime12(timings.Maghrib)}
             </p>
             {iftarDiff > 0 && (
               <div className="mt-2 flex items-center justify-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20">

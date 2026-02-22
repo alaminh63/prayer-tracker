@@ -50,7 +50,7 @@ export default function SurahDetailPage() {
     <AppShell>
       {/* Sticky Header */}
       <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40 px-4 py-3 lg:px-8">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+        <div className="  mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/quran">
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -104,7 +104,7 @@ export default function SurahDetailPage() {
         </div>
       </div>
 
-      <div className="px-4 lg:px-8 max-w-4xl mx-auto py-8">
+      <div className="px-4 lg:px-8   mx-auto py-8">
         {/* Bismillah */}
         {!isLoading && surahNumber !== 1 && surahNumber !== 9 && (
           <div className="text-center mb-12 py-8 bg-primary/5 rounded-3xl border border-primary/10">

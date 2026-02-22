@@ -57,3 +57,20 @@ export const useYearlyCalendar = (year: number, latitude: number | null, longitu
     isError: error,
   }
 }
+
+export const useHijriCalendar = (hijriYear: number, hijriMonth: number, latitude: number | null, longitude: number | null, method: number = 2) => {
+  const shouldFetch = latitude !== null && longitude !== null
+  
+  const { data, error, isLoading } = useSWR(
+    shouldFetch 
+      ? `https://api.aladhan.com/v1/hijriCalendar/${hijriYear}/${hijriMonth}?latitude=${latitude}&longitude=${longitude}&method=${method}`
+      : null,
+    fetcher
+  )
+
+  return {
+    days: data?.data as any[] || [],
+    isLoading,
+    isError: error,
+  }
+}

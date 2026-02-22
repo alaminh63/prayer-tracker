@@ -46,17 +46,19 @@ const CACHE_KEY = "salat_hadith_daily"
 
 export const fetchDailyHadith = createAsyncThunk(
   "hadith/fetchDaily",
-  async (_, { getState }) => {
+  async (options: { language: string; force?: boolean } | undefined, { getState }) => {
+    const language = options?.language || "bn"
+    const force = options?.force || false
     const today = new Date().toISOString().split("T")[0]
     const state = getState() as { hadith: HadithState }
     
-    // Return cached if still today
-    if (state.hadith.dailyHadith.lastUpdated === today && state.hadith.dailyHadith.hadith) {
+    // Return cached if still today and not forced
+    if (!force && state.hadith.dailyHadith.lastUpdated === today && state.hadith.dailyHadith.hadith) {
       return null
     }
 
-    // Attempt to load from localStorage first if Redux state is empty
-    if (typeof window !== "undefined") {
+    // Attempt to load from localStorage first if Redux state is empty and not forced
+    if (!force && typeof window !== "undefined") {
       const cached = localStorage.getItem(CACHE_KEY)
       if (cached) {
         const parsed = JSON.parse(cached)
@@ -66,10 +68,18 @@ export const fetchDailyHadith = createAsyncThunk(
       }
     }
 
-    // Pick a random book and hadith
-    const randomBook = state.hadith.books[Math.floor(Math.random() * state.hadith.books.length)]
+    // Pick a random book
+    const books = state.hadith.books
+    const randomBook = books[Math.floor(Math.random() * books.length)]
+    
+    // Construct API ID based on language
+    // Current IDs are like "ben-bukhari". English counterpart is "eng-bukhari"
+    const apiId = language === "bn" ? randomBook.id : randomBook.id.replace("ben-", "eng-")
+    
     try {
-      const res = await fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/${randomBook.id}.json`)
+      const res = await fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/${apiId}.json`)
+      if (!res.ok) throw new Error("API call failed")
+      
       const data = await res.json()
       const randomHadith = data.hadiths[Math.floor(Math.random() * data.hadiths.length)]
       

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useAppSelector } from "@/store/hooks"
-import { parseTimeString, PRAYER_LABELS } from "@/lib/prayer-utils"
+import { parseTimeString, PRAYER_LABELS, formatTime12 } from "@/lib/prayer-utils"
 import { motion } from "framer-motion"
 import { Clock, Bell, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -40,13 +40,9 @@ export function NextPrayerHero() {
   if (!timings || !nextPrayer) return null
 
   const nextTimeStr = timings[nextPrayer]
-  const nextTime = parseTimeString(nextTimeStr)
-  const hours12 = nextTime.getHours() % 12 || 12
-  const minutes = nextTime.getMinutes().toString().padStart(2, "0")
-  const period = nextTime.getHours() >= 12 ? "PM" : "AM"
 
   return (
-    <div className="relative w-full overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-white/5 shadow-2xl">
+    <div className="relative w-full overflow-hidden rounded-[2.5rem] bg-card border border-border shadow-2xl">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-linear-to-br from-primary/20 via-transparent to-accent/20" />
       <div className="absolute -top-24 -right-24 h-96 w-96 bg-primary/20 blur-[120px] rounded-full animate-pulse" />
@@ -68,16 +64,16 @@ export function NextPrayerHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-0.5">
+            <h1 className="text-3xl md:text-5xl font-black text-foreground dark:text-white tracking-tighter mb-0.5">
               {PRAYER_LABELS[nextPrayer]}
             </h1>
             <div className="flex items-center justify-center md:justify-start gap-2.5">
               <div className="flex items-center gap-1 text-zinc-500">
                 <Clock className="h-3 w-3" />
-                <span className="text-sm font-bold">{hours12}:{minutes} {period}</span>
+                <span className="text-sm font-bold">{formatTime12(nextTimeStr)}</span>
               </div>
-              <div className="h-1 w-1 rounded-full bg-zinc-800" />
-              <div className="flex items-center gap-1 text-zinc-500">
+              <div className="h-1.5 w-1.5 rounded-full bg-border" />
+              <div className="flex items-center gap-1 text-muted-foreground">
                 <MapPin className="h-3 w-3" />
                 <span className="text-[9px] font-bold uppercase tracking-widest">{city || "Dhaka"}</span>
               </div>
@@ -102,11 +98,11 @@ export function NextPrayerHero() {
           transition={{ delay: 0.2, type: "spring" }}
           className="relative"
         >
-          <div className="h-32 w-32 md:h-40 md:w-40 rounded-full border-4 border-white/5 flex items-center justify-center relative overflow-hidden group">
+          <div className="h-32 w-32 md:h-40 md:w-40 rounded-full border-4 border-muted flex items-center justify-center relative overflow-hidden group">
             <div className="absolute inset-0 bg-primary/5 blur-3xl scale-110 group-hover:scale-125 transition-transform" />
             <div className="text-center relative z-10">
               <p className="text-[7px] font-black text-primary uppercase tracking-[0.3em] mb-0.5">Remaining</p>
-              <div className="text-xl md:text-3xl font-black text-white tabular-nums tracking-tighter">
+              <div className="text-xl md:text-3xl font-black text-foreground dark:text-white tabular-nums tracking-tighter">
                 {timeLeft || "00:00:00"}
               </div>
             </div>
@@ -119,14 +115,14 @@ export function NextPrayerHero() {
       </div>
 
       {/* Simplified Footer Info */}
-      <div className="relative px-5 py-3 border-t border-white/5 bg-white/1 flex flex-col md:flex-row items-center justify-between gap-2">
+      <div className="relative px-5 py-3 border-t border-border bg-muted/30 flex flex-col md:flex-row items-center justify-between gap-2">
          <div className="flex items-center gap-2">
             <div className="h-5 w-5 rounded-md bg-accent/10 flex items-center justify-center text-accent">
                <MapPin size={10} />
             </div>
-            <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Calculated for <span className="text-white">{city || "Location"}</span></p>
+            <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Calculated for <span className="text-foreground dark:text-white">{city || "Location"}</span></p>
          </div>
-         <p className="text-[8px] text-zinc-600 font-black uppercase tracking-[0.2em] hidden md:block">Next: {nextPrayer} • Today: {currentPrayer || "---"}</p>
+         <p className="text-[8px] text-muted-foreground font-black uppercase tracking-[0.2em] hidden md:block">Next: {nextPrayer} • Today: {currentPrayer || "---"}</p>
       </div>
     </div>
   )

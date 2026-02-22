@@ -36,13 +36,13 @@ export default function CalculatorsHubPage() {
   return (
     <AppShell>
       <PageHeader 
-        title={<span className="text-gradient">হিসাব-নিকাশ</span>} 
-        subtitle="সঠিকভাবে আপনার জাকাত এবং ফিতরা হিসাব করুন" 
+        title={<span className="text-gradient">{t.calculators.title}</span>} 
+        subtitle={t.calculators.subtitle} 
       />
 
-      <div className="px-4 lg:px-8 pb-32 w-full max-w-7xl mx-auto">
-        {/* Modern Tab Hub */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+      <div className="px-4 lg:px-8 pb-32 w-full mx-auto">
+        {/* Modern Compact Tab Switcher */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12 p-2 bg-secondary border border-border rounded-[2.5rem] shadow-sm ring-1 ring-border/5 max-w-sm mx-auto">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id
             return (
@@ -50,46 +50,24 @@ export default function CalculatorsHubPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "relative group p-8 rounded-[2.5rem] border-2 transition-all duration-700 overflow-hidden text-left",
-                  isActive 
-                    ? "bg-zinc-900 border-primary shadow-2xl" 
-                    : "bg-zinc-950/40 border-white/5 hover:border-white/10"
+                  "relative group flex items-center gap-3 px-8 py-3.5 rounded-full transition-all duration-500 overflow-hidden",
+                  isActive ? "text-white" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                {/* Background Decor */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeCalculatorTab"
+                    className={cn("absolute inset-0 bg-linear-to-r shadow-2xl", tab.color)}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
                 <div className={cn(
-                  "absolute top-0 right-0 h-48 w-48 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 opacity-20 transition-all duration-700",
-                  isActive ? "bg-primary opacity-40 scale-150" : "bg-white/5"
-                )} />
-
-                <div className="flex items-start justify-between relative z-10">
-                  <div className="space-y-6 w-full">
-                    <div className={cn(
-                      "h-16 w-16 rounded-2xl flex items-center justify-center transition-all duration-700 shadow-2xl",
-                      isActive ? "bg-primary text-white scale-110" : "bg-zinc-900 text-zinc-500"
-                    )}>
-                      {tab.icon}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h3 className={cn(
-                        "text-3xl font-black tracking-tight transition-colors duration-500",
-                        isActive ? "text-white" : "text-zinc-500"
-                      )}>{tab.label}</h3>
-                      <p className={cn(
-                        "text-sm font-bold transition-colors duration-500",
-                        isActive ? "text-white/60" : "text-zinc-700"
-                      )}>{tab.description}</p>
-                    </div>
-
-                    <div className={cn(
-                      "flex items-center gap-2 text-xs font-black uppercase tracking-widest transition-all duration-500",
-                      isActive ? "text-primary opacity-100 translate-x-2" : "text-zinc-800 opacity-0 -translate-x-4"
-                    )}>
-                      {t.common.done} <ArrowRight size={14} />
-                    </div>
-                  </div>
+                  "relative z-10 transition-transform duration-500",
+                  isActive ? "scale-110" : "group-hover:scale-110"
+                )}>
+                  {tab.icon}
                 </div>
+                <span className="relative z-10   font-black uppercase tracking-wider">{tab.label}</span>
               </button>
             )
           })}

@@ -12,18 +12,18 @@ import { AdhanPlayer } from "@/components/adhan-player"
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt"
 
 const navItems = [
-  { href: "/", icon: Home, label: "Home" },
-  { href: "/prayers", icon: Clock, label: "Prayers" },
-  { href: "/tracker", icon: Activity, label: "Tracker" },
-  { href: "/calendar", icon: Calendar, label: "Calendar" },
-  { href: "/qibla", icon: Compass, label: "Qibla" },
-  { href: "/deen", icon: Heart, label: "Deen Hub" },
-  { href: "/calculators", icon: Calculator, label: "Calculators" },
-  { href: "/quran", icon: BookOpen, label: "Quran" },
-  { href: "/hadith", icon: BookOpen, label: "Hadith" },
-  { href: "/quran/bookmarks", icon: Bookmark, label: "Bookmarks" },
-  { href: "/quran/history", icon: HistoryIcon, label: "History" },
-  { href: "/settings", icon: Settings, label: "Settings" },
+  { href: "/", icon: Home, label: "Home", translationKey: "home" },
+  { href: "/prayers", icon: Clock, label: "Prayers", translationKey: "prayers" },
+  { href: "/tracker", icon: Activity, label: "Tracker", translationKey: "tracker" },
+  { href: "/calendar", icon: Calendar, label: "Calendar", translationKey: "calendar" },
+  { href: "/qibla", icon: Compass, label: "Qibla", translationKey: "qibla" },
+  { href: "/deen", icon: Heart, label: "Deen Hub", translationKey: "deen" },
+  { href: "/calculators", icon: Calculator, label: "Calculators", translationKey: "calculators" },
+  { href: "/quran", icon: BookOpen, label: "Quran", translationKey: "quran" },
+  { href: "/hadith", icon: BookOpen, label: "Hadith", translationKey: "hadith" },
+  { href: "/quran/bookmarks", icon: Bookmark, label: "Bookmarks", translationKey: "bookmarks" },
+  { href: "/quran/history", icon: HistoryIcon, label: "History", translationKey: "history" },
+  { href: "/settings", icon: Settings, label: "Settings", translationKey: "settings" },
 ]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -31,13 +31,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const { t, language } = useTranslation()
 
-  const translatedNavItems = navItems.map(item => {
-    const key = item.href === "/" ? "home" : item.href.replace("/", "") as keyof typeof t.nav
-    return {
-      ...item,
-      label: t.nav[key] || item.label
-    }
-  })
+  const translatedNavItems = navItems.map(item => ({
+    ...item,
+    label: t.nav[item.translationKey as keyof typeof t.nav] || item.label
+  }))
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -66,7 +63,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </svg>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground tracking-tight">Salat Time</h1>
+              <h1 className="text-lg font-bold text-foreground tracking-tight">CloudGen</h1>
               <p className="text-[11px] text-muted-foreground">
                 {language === "bn" ? "প্রার্থনার সময় এবং অনুস্মারক" : "Prayer Times & Reminders"}
               </p>
@@ -98,12 +95,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {/* Bottom Info */}
           <div className="mt-auto px-3">
-            <div className="rounded-xl border border-border bg-secondary/40 p-4">
-              <p className="text-xs font-medium text-foreground">Salat Time v2.0</p>
+            <Link 
+              href="https://cloudgen.bd" 
+              target="_blank" 
+              className="block rounded-xl border border-border bg-secondary/40 p-4 hover:bg-secondary/60 transition-colors group"
+            >
+              <p className="text-xs font-black text-foreground group-hover:text-primary transition-colors">CloudGen</p>
               <p className="text-[11px] text-muted-foreground mt-1">
-                Powered by Aladhan API
+                Build by CloudGen.bd
               </p>
-            </div>
+            </Link>
           </div>
         </div>
       </aside>
