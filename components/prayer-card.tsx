@@ -3,13 +3,13 @@
 import { useAppSelector } from "@/store/hooks"
 import {
   PRAYER_NAMES,
-  PRAYER_LABELS,
   PRAYER_ARABIC,
   formatTime12,
   type PrayerName,
 } from "@/lib/prayer-utils"
 import { Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/hooks/use-translation"
 
 function PrayerIcon({ name }: { name: PrayerName }) {
   const iconMap: Record<PrayerName, string> = {
@@ -41,9 +41,11 @@ function PrayerIcon({ name }: { name: PrayerName }) {
 }
 
 export function PrayerCard() {
-  const { timings, currentPrayer, nextPrayer, loading } = useAppSelector(
-    (state) => state.prayer
-  )
+  const timings = useAppSelector((state) => state.prayer.timings)
+  const currentPrayer = useAppSelector((state) => state.prayer.currentPrayer)
+  const nextPrayer = useAppSelector((state) => state.prayer.nextPrayer)
+  const loading = useAppSelector((state) => state.prayer.loading)
+  const { t } = useTranslation()
 
   if (loading || !timings) {
     return (
@@ -106,18 +108,18 @@ export function PrayerCard() {
                         : "text-card-foreground"
                   )}
                 >
-                  {PRAYER_LABELS[name]}
+                  {t.prayers[name.toLowerCase() as keyof typeof t.prayers]}
                 </p>
-                <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground/60">
+                <p className="text-xs font-medium uppercase text-muted-foreground/60">
                   {PRAYER_ARABIC[name]}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               {isNext && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary animate-pulse-soft">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-bold uppercase text-primary animate-pulse-soft">
                   <Clock className="h-3 w-3" />
-                  Upcoming
+                  {t.common.upcoming}
                 </span>
               )}
               <span

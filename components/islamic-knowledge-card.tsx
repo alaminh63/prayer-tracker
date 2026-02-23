@@ -63,42 +63,44 @@ export function IslamicKnowledgeCard() {
     <div className="relative overflow-hidden rounded-[2.5rem] bg-card border border-border group h-full min-h-[220px] flex flex-col justify-between">
       <div className="absolute -top-12 -right-12 h-40 w-40 bg-primary/5 blur-3xl rounded-full group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
       
-      <div className="relative z-10 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-            <Star className="h-5 w-5 fill-primary" />
+      <div className="relative z-10 p-8 flex flex-col justify-between h-full space-y-4">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+              <Star className="h-5 w-5 fill-primary" />
+            </div>
+            <button 
+              onClick={handleRefresh}
+              className={cn(
+                "p-2.5 rounded-xl bg-secondary border border-border text-primary hover:bg-primary/20 transition-all active:scale-95",
+                isRefreshing && "animate-spin"
+              )}
+              title="নতুন তথ্য"
+            >
+              <RefreshCw size={16} />
+            </button>
           </div>
-          <button 
-            onClick={handleRefresh}
-            className={cn(
-              "p-2.5 rounded-xl bg-secondary border border-border text-primary hover:bg-primary/20 transition-all active:scale-95",
-              isRefreshing && "animate-spin"
-            )}
-            title="নতুন তথ্য"
-          >
-            <RefreshCw size={16} />
-          </button>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-3"
+            >
+              <h4 className="text-xl font-black text-foreground dark:text-white tracking-tight">{item.title}</h4>
+              <p className="text-base text-muted-foreground dark:text-zinc-300 leading-relaxed font-bold">
+                {item.text}
+              </p>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="space-y-3"
-          >
-            <h4 className="text-xl font-black text-foreground dark:text-white tracking-tight">{item.title}</h4>
-            <p className="text-base text-muted-foreground dark:text-zinc-300 leading-relaxed font-bold">
-              {item.text}
-            </p>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className="relative z-10 pt-4">
-        <div className="h-1 w-12 bg-primary/40 rounded-full" />
+        <div className="pt-4">
+          <div className="h-1 w-12 bg-primary/40 rounded-full" />
+        </div>
       </div>
     </div>
   )

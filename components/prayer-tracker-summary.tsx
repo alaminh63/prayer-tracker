@@ -6,12 +6,14 @@ import { Trophy, Activity, ArrowRight, Star, Heart, Cloud, ShieldCheck, Sun, Moo
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useAppSelector } from "@/store/hooks"
+import { useTranslation } from "@/hooks/use-translation"
 
 const PRAYER_IDS = ["fajr", "dhuhr", "asr", "maghrib", "isha"]
 
 export function PrayerTrackerSummary() {
   const [data, setData] = useState<any>({ salat: {}, morning: {}, evening: {}, night: {} })
   const [loading, setLoading] = useState(true)
+  const { t } = useTranslation()
   const date = new Date().toISOString().split("T")[0]
   
   useEffect(() => {
@@ -56,13 +58,13 @@ export function PrayerTrackerSummary() {
             <Activity size={24} strokeWidth={2.5} />
           </div>
           <div>
-            <h3 className="text-2xl font-black text-foreground tracking-tight">দৈনিক আমল</h3>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] mt-1 text-muted-foreground">প্রগ্রেস ড্যাশবোর্ড</p>
+            <h3 className="text-2xl font-black text-foreground tracking-tight">{t.tracker.daily_title}</h3>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] mt-1 text-muted-foreground">{t.tracker.progress_dashboard}</p>
           </div>
         </div>
         <Link href="/tracker">
           <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border text-[11px] font-black uppercase text-primary hover:bg-primary/10 hover:border-primary/20 transition-all active:scale-95 group/btn">
-            বিস্তারিত 
+            {t.tracker.details}
             <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
           </button>
         </Link>
@@ -79,7 +81,7 @@ export function PrayerTrackerSummary() {
                 <div className="p-2 rounded-lg bg-primary/20">
                   <Heart className="h-4 w-4 text-primary fill-primary" />
                 </div>
-                <p className="font-black uppercase text-xs tracking-widest text-zinc-400">৫ ওয়াক্ত সালাত</p>
+                <p className="font-black uppercase text-xs tracking-widest text-zinc-400">{t.tracker.five_salat}</p>
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-3xl font-black text-foreground tracking-tighter">{completedSalat}</span>
@@ -110,7 +112,7 @@ export function PrayerTrackerSummary() {
             </div>
             
             <div className="mt-4 flex justify-between">
-              <p className="text-[10px] font-black uppercase text-muted-foreground">সালাত প্রগ্রেস</p>
+              <p className="text-[10px] font-black uppercase text-muted-foreground">{t.tracker.salat_progress}</p>
               <p className="text-[10px] font-black text-primary uppercase">{(completedSalat / 5) * 100}% Complete</p>
             </div>
 
@@ -120,7 +122,7 @@ export function PrayerTrackerSummary() {
           {/* Daily Score Circle Card */}
           <div className="md:col-span-5 p-7 rounded-[2.5rem] bg-card border border-border flex items-center justify-between relative overflow-hidden group/score shadow-sm">
             <div className="space-y-2">
-               <p className="font-black uppercase text-xs tracking-widest text-muted-foreground">আজকের স্কোর</p>
+               <p className="font-black uppercase text-xs tracking-widest text-muted-foreground">{t.tracker.today_score}</p>
                <p className="text-5xl font-black text-foreground tracking-tighter tabular-nums drop-shadow-lg">{overallProgress}%</p>
                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 w-fit">
                   <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -152,7 +154,7 @@ export function PrayerTrackerSummary() {
         <div className="grid grid-cols-3 gap-5">
           {[
             { 
-              label: "সকাল", 
+              label: t.tracker.morning, 
               val: completedMorning, 
               total: 3, 
               icon: Cloud, 
@@ -161,7 +163,7 @@ export function PrayerTrackerSummary() {
               ring: "ring-sky-500/20"
             },
             { 
-              label: "বিকাল", 
+              label: t.tracker.afternoon, 
               val: completedEvening, 
               total: 3, 
               icon: Sun, 
@@ -170,7 +172,7 @@ export function PrayerTrackerSummary() {
               ring: "ring-amber-500/20"
             },
             { 
-              label: "রাত", 
+              label: t.tracker.night, 
               val: completedNight, 
               total: 3, 
               icon: Moon, 
@@ -228,8 +230,8 @@ export function PrayerTrackerSummary() {
               <Trophy size={28} className="animate-bounce" />
             </div>
             <div>
-              <h5 className="text-base font-black uppercase tracking-tight">মাশা-আল্লাহ!</h5>
-              <p className="text-[11px] font-bold text-emerald-500/70 leading-relaxed uppercase">আপনার আজকের প্রগ্রেস অসাধারণ। আমলগুলো কবুল হোক ইনশা-আল্লাহ।</p>
+              <h5 className="text-base font-black uppercase tracking-tight">{t.tracker.mashaallah}</h5>
+              <p className="text-[11px] font-bold text-emerald-500/70 leading-relaxed uppercase">{t.tracker.success_msg}</p>
             </div>
             <div className="absolute top-0 right-0 h-full w-24 bg-emerald-500/5 blur-2xl group-hover/success:bg-emerald-500/10 transition-colors" />
           </motion.div>

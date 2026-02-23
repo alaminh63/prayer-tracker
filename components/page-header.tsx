@@ -20,8 +20,11 @@ export function PageHeader({
   const dispatch = useAppDispatch()
   const { latitude, longitude, city, loading: locLoading, permissionDenied } =
     useAppSelector((state) => state.location)
-  const { hijriDate, hijriMonth, hijriYear, gregorianDate, loading: prayerLoading } =
-    useAppSelector((state) => state.prayer)
+  const hijriDate = useAppSelector((state) => state.prayer.hijriDate)
+  const hijriMonth = useAppSelector((state) => state.prayer.hijriMonth)
+  const hijriYear = useAppSelector((state) => state.prayer.hijriYear)
+  const gregorianDate = useAppSelector((state) => state.prayer.gregorianDate)
+  const prayerLoading = useAppSelector((state) => state.prayer.loading)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {

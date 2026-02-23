@@ -10,23 +10,20 @@ import { Moon, Clock, MapPin, Calendar, RefreshCw, Bell, Sparkles } from "lucide
 import { formatCountdown, getCurrentAndNextPrayer, formatTime12, getTimeDiff } from "@/lib/prayer-utils"
 import { cn } from "@/lib/utils"
 import { ALLAH_NAMES, AllahName } from "@/lib/allah-names"
+import { useTranslation } from "@/hooks/use-translation"
 
-const BN_PRAYER_NAMES: Record<string, string> = {
-  Fajr: "ফজর",
-  Sunrise: "সূর্যোদয়",
-  Dhuhr: "যোহর",
-  Asr: "আসর",
-  Maghrib: "মাগরিব",
-  Isha: "এশা",
-}
 
 export function PremiumHomeHero() {
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const { timings, nextPrayer, timeLeft } = useAppSelector((state) => state.prayer)
+  const timings = useAppSelector((state) => state.prayer.timings)
+  const nextPrayer = useAppSelector((state) => state.prayer.nextPrayer)
+  const timeLeft = useAppSelector((state) => state.prayer.timeLeft)
   const [currentName, setCurrentName] = useState<AllahName | null>(null)
   const { city, loading: locLoading } = useAppSelector((state) => state.location)
-  const { hijriDate, hijriMonth } = useAppSelector((state) => state.prayer)
+  const hijriDate = useAppSelector((state) => state.prayer.hijriDate)
+  const hijriMonth = useAppSelector((state) => state.prayer.hijriMonth)
+  const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
 
   const updatePrayerInfo = useCallback(() => {
@@ -51,10 +48,10 @@ export function PremiumHomeHero() {
 
   if (!mounted) return null
 
-  const greeting = "আস-সালামু আলাইকুম"
+  const greeting = t.common.assalamu_alaikum
   const subGreeting = nextPrayer 
-    ? `${BN_PRAYER_NAMES[nextPrayer] || nextPrayer} এর জন্য প্রস্তুতি নিন`
-    : "আপনার ইবাদত কবুল হোক"
+    ? t.common.preparation_next.replace("{prayer}", t.prayers[nextPrayer.toLowerCase() as keyof typeof t.prayers])
+    : t.common.praise_allah
 
   return (
     <div className="relative w-full overflow-hidden rounded-[3rem] bg-card border border-border shadow-2xl min-h-[400px] flex flex-col justify-between">
@@ -72,7 +69,7 @@ export function PremiumHomeHero() {
           >
              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary border border-border backdrop-blur-xl group transition-all hover:bg-secondary/80">
                 <MapPin className="h-3 w-3 text-primary" />
-                <span className="text-[10px] font-black text-muted-foreground uppercase  ">{city || "Detecting..."}</span>
+                <span className="text-[10px] font-black text-muted-foreground uppercase  ">{city || t.common.detecting}</span>
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
@@ -136,7 +133,7 @@ export function PremiumHomeHero() {
                 >
                   <div className="flex items-center gap-2 mb-8">
                     <Sparkles className="w-3 h-3 text-primary/50" />
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Al-Asma-ul-Husna</span>
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t.nav.names}</span>
                     <Sparkles className="w-3 h-3 text-primary/50" />
                   </div>
 
@@ -157,7 +154,7 @@ export function PremiumHomeHero() {
 
             {/* Interaction hint */}
             <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <span className="text-xs font-bold text-zinc-600 uppercase ">ট্যাপ করে পরিবর্তন করুন</span>
+              <span className="text-xs font-bold text-zinc-600 uppercase ">{t.common.tap_to_change}</span>
             </div>
           </div>
         </motion.div>
@@ -169,7 +166,7 @@ export function PremiumHomeHero() {
           transition={{ delay: 0.2 }}
           className="relative flex flex-col items-center md:items-end gap-1"
         >
-          <div className=" font-bold  uppercase  mb-1 text-muted-foreground">পরবর্তী নামাজের সময়</div>
+          <div className=" font-bold  uppercase  mb-1 text-muted-foreground">{t.prayers.next_prayer}</div>
           <div className="flex items-baseline gap-1">
              <span className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight tabular-nums drop-shadow-xl">
                {formatCountdown(timeLeft).split(":")[0]}
@@ -208,7 +205,7 @@ export function PremiumHomeHero() {
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">আজকের সেহরি</div>
+                  <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t.common.today} {t.prayers.sehri_ends}</div>
                   <div className="text-sm font-bold text-foreground tabular-nums">
                     {formatTime12(timings?.Fajr || "")}
                   </div>
@@ -241,7 +238,7 @@ export function PremiumHomeHero() {
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">আজকের ইফতার</div>
+                  <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t.common.today} {t.prayers.iftar_time}</div>
                   <div className="text-sm font-bold text-foreground tabular-nums">
                     {formatTime12(timings?.Maghrib || "")}
                   </div>
@@ -263,8 +260,8 @@ export function PremiumHomeHero() {
               <Bell className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <div className="  font-medium text-primary uppercase  ">পরবর্তী নামাজ</div>
-              <div className="text-sm font-bold text-foreground">{BN_PRAYER_NAMES[nextPrayer] || nextPrayer} — {formatTime12(timings?.[nextPrayer] || "")}</div>
+              <div className="  font-medium text-primary uppercase  ">{t.prayers.next_prayer}</div>
+              <div className="text-sm font-bold text-foreground">{t.prayers[nextPrayer.toLowerCase() as keyof typeof t.prayers]} — {formatTime12(timings?.[nextPrayer] || "")}</div>
             </div>
           </div>
           )}

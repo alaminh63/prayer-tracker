@@ -30,7 +30,7 @@ export function QiblaCompass() {
       setIsSupported(supported)
       
       if (!win.isSecureContext) {
-        setError(language === "bn" ? "কম্পাস ব্যবহারের জন্য HTTPS সংযোগ প্রয়োজন।" : "HTTPS connection is required for compass.")
+        setError(t.common.compass_error_https)
       }
     }
   }, [language])
@@ -70,7 +70,7 @@ export function QiblaCompass() {
           typeof (DeviceOrientationEvent as any).requestPermission === "function") {
         const response = await (DeviceOrientationEvent as any).requestPermission()
         if (response !== "granted") {
-          setError(language === "bn" ? "সেন্সর দেখার অনুমতি পাওয়া যায়নি।" : "Sensor permission not granted.")
+          setError(t.common.compass_error_permission)
           return
         }
       }
@@ -83,10 +83,10 @@ export function QiblaCompass() {
       } else if ("DeviceOrientationEvent" in win) {
         win.addEventListener("deviceorientation", handleOrientation, true)
       } else {
-        setError(language === "bn" ? "আপনার ডিভাইসটি কম্পাস সেন্সর সাপোর্ট করে না।" : "Your device does not support compass sensors.")
+        setError(t.common.compass_error_unsupported)
       }
     } catch (err) {
-      setError(language === "bn" ? "কম্পাস চালু করতে সমস্যা হয়েছে।" : "Failed to start compass.")
+      setError(t.common.compass_error_failed)
       console.error(err)
     }
   }
@@ -109,10 +109,10 @@ export function QiblaCompass() {
     <div className="flex flex-col items-center gap-6 p-8 glass-card">
       <div className="text-center space-y-1">
         <h3 className="text-lg font-bold text-gradient">
-          {language === "bn" ? "কেবলা কম্পাস (Qibla Direction)" : "Qibla Direction"}
+          {t.common.qibla_title}
         </h3>
         <p className="text-xs text-muted-foreground">
-          {language === "bn" ? "সঠিক দিক পেতে ফোনটি মাটির সমান্তরালে রাখুন" : "Keep your phone horizontal for better accuracy"}
+          {t.common.qibla_guide}
         </p>
       </div>
 
@@ -150,7 +150,7 @@ export function QiblaCompass() {
       <div className="text-center w-full space-y-4">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-mono font-bold text-primary">
-            {Math.round(qiblaDirection)}° {language === "bn" ? "উত্তর থেকে" : "from North"}
+            {Math.round(qiblaDirection)}° {t.common.from_north}
           </p>
           {debug && (
             <p className="text-[10px] font-mono text-muted-foreground opacity-50">
@@ -179,11 +179,7 @@ export function QiblaCompass() {
           <div className="flex items-start gap-2 bg-secondary/30 p-3 rounded-xl text-[10px] text-muted-foreground text-left">
             <div className="h-4 w-4 rounded-full bg-primary/20 flex items-center justify-center shrink-0 text-primary font-bold">!</div>
             <p>
-              {t.common.compass_guide}
-              {" "}
-              {language === "bn" 
-                ? "কম্পাস কাজ না করলে ব্রাউজারের সেন্সর পারমিশন চেক করুন।" 
-                : "If compass doesn't work, check browser sensor permissions."}
+              {t.common.compass_permission_guide}
             </p>
           </div>
         </div>

@@ -1,0 +1,15 @@
+services:
+  prayer-time-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: prayer-time-pwa
+    restart: unless-stopped
+    ports:
+      - "3010:3010"
+    environment:
+      - NODE_ENV=production
+      - PORT=3010
+      - HOSTNAME=0.0.0.0
+    env_file:
+      - .env

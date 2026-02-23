@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select"
 import { Bell, Moon, Sun, MapPin, Calculator, Info } from "lucide-react"
 import { useTheme } from "next-themes"
+import Image from "next/image"
 
 const calculationMethods = [
   { value: "1", label: "University of Islamic Sciences, Karachi" },
@@ -239,6 +240,58 @@ export function SettingsPanel() {
         </div>
       </section>
 
+      {/* Hijri Date Correction */}
+      <section className="glass-card rounded-2xl p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4 flex items-center gap-2">
+          <Moon className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          {t.settings.hijri_offset}
+        </h2>
+        <div className="flex flex-col gap-3">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {settings.language === "bn"
+              ? "চাঁদ দেখার উপর ভিত্তি করে হিজরি তারিখ ১-২ দিন পার্থক্য হতে পারে। আপনার দেশ অনুযায়ী সংশোধন করুন।"
+              : "The Hijri date may differ by 1-2 days based on moon sighting. Adjust accordingly."}
+          </p>
+          <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/10">
+            <button
+              onClick={() => dispatch(setHijriOffset(Math.max(-2, settings.hijriOffset - 1)))}
+              disabled={settings.hijriOffset <= -2}
+              className="h-10 w-10 rounded-xl bg-secondary border border-border flex items-center justify-center text-xl font-bold hover:bg-primary/10 hover:border-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+              aria-label="Decrease Hijri offset"
+            >
+              −
+            </button>
+            <div className="text-center">
+              <p className={`text-3xl font-black tabular-nums ${
+                settings.hijriOffset > 0 ? "text-emerald-500" :
+                settings.hijriOffset < 0 ? "text-orange-500" : "text-foreground"
+              }`}>
+                {settings.hijriOffset > 0 ? "+" : ""}{settings.hijriOffset}
+              </p>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase mt-1">
+                {settings.language === "bn" ? "দিন সংশোধন" : "Day Offset"}
+              </p>
+            </div>
+            <button
+              onClick={() => dispatch(setHijriOffset(Math.min(2, settings.hijriOffset + 1)))}
+              disabled={settings.hijriOffset >= 2}
+              className="h-10 w-10 rounded-xl bg-secondary border border-border flex items-center justify-center text-xl font-bold hover:bg-primary/10 hover:border-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+              aria-label="Increase Hijri offset"
+            >
+              +
+            </button>
+          </div>
+          {settings.hijriOffset !== 0 && (
+            <button
+              onClick={() => dispatch(setHijriOffset(0))}
+              className="text-[11px] font-bold text-muted-foreground hover:text-primary transition-colors text-center underline underline-offset-2"
+            >
+              {settings.language === "bn" ? "ডিফল্টে ফিরে যান" : "Reset to default"}
+            </button>
+          )}
+        </div>
+      </section>
+
 
       {/* Appearance Settings */}
       <section className="glass-card rounded-2xl p-5">
@@ -266,7 +319,15 @@ export function SettingsPanel() {
       </section>
 
       {/* App Info */}
-      <section className="glass-card rounded-2xl p-5 text-center">
+      <section className="glass-card rounded-2xl p-5 text-center flex flex-col items-center gap-2">
+        <div className="h-8 w-8 relative">
+          <Image
+            src="/logo.png"
+            alt="CloudGen Logo"
+            fill
+            className="object-contain dark:invert"
+          />
+        </div>
         <p className="text-sm font-black text-foreground">CloudGen</p>
         <p className="text-[11px] text-muted-foreground mt-1">{t.settings.version}</p>
         <p className="text-[11px] text-muted-foreground mt-2">

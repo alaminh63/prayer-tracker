@@ -3,19 +3,21 @@
 import { useAppSelector } from "@/store/hooks"
 import {
   PRAYER_NAMES,
-  PRAYER_LABELS,
   PRAYER_ARABIC,
   parseTimeString,
   formatTime12,
   type PrayerName,
 } from "@/lib/prayer-utils"
 import { cn } from "@/lib/utils"
-import { Sunrise } from "lucide-react"
+import { Sunrise, Clock } from "lucide-react"
+import { useTranslation } from "@/hooks/use-translation"
 
 export function PrayerDetailList() {
-  const { timings, currentPrayer, nextPrayer, loading } = useAppSelector(
-    (state) => state.prayer
-  )
+  const timings = useAppSelector((state) => state.prayer.timings)
+  const currentPrayer = useAppSelector((state) => state.prayer.currentPrayer)
+  const nextPrayer = useAppSelector((state) => state.prayer.nextPrayer)
+  const loading = useAppSelector((state) => state.prayer.loading)
+  const { t } = useTranslation()
 
   if (loading || !timings) {
     return (
@@ -49,7 +51,7 @@ export function PrayerDetailList() {
   }[] = [
     ...PRAYER_NAMES.map((name) => ({
       name,
-      label: PRAYER_LABELS[name],
+      label: t.prayers[name.toLowerCase() as keyof typeof t.prayers],
       arabic: PRAYER_ARABIC[name],
       time: timings[name],
       isNext: nextPrayer === name,
@@ -61,7 +63,7 @@ export function PrayerDetailList() {
   const sunriseIndex = allTimes.findIndex((t) => t.name === "Fajr") + 1
   allTimes.splice(sunriseIndex, 0, {
     name: "Sunrise",
-    label: "Sunrise",
+    label: t.prayers.sunrise,
     arabic: "\u0634\u0631\u0648\u0642",
     time: timings.Sunrise,
     isNext: false,
@@ -105,7 +107,7 @@ export function PrayerDetailList() {
                           : "bg-muted text-muted-foreground"
                     )}
                   >
-                    {prayer.label.charAt(0)}
+                    <Clock size={16} />
                   </div>
                 )}
                 <div>
@@ -133,13 +135,11 @@ export function PrayerDetailList() {
                 </p>
               </div>
             </div>
-            {prayer.isNext && (
               <div className="mt-3 pt-3 border-t border-primary/20">
-                <p className="text-xs text-primary font-medium">
-                  Coming up next
+                <p className="text-sm text-primary font-medium">
+                  {t.prayers.next_prayer}
                 </p>
               </div>
-            )}
           </div>
         )
       })}

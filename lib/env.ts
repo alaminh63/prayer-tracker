@@ -5,6 +5,9 @@ const envSchema = z.object({
   MONGODB_DB: z.string().default("prayer_times_app"),
   NEXT_PUBLIC_API_URL: z.string().url().default("http://localhost:3000"),
   NEXT_PUBLIC_APP_NAME: z.string().default("Prayer Times PWA"),
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string(),
+  VAPID_PRIVATE_KEY: z.string(),
+  VAPID_EMAIL: z.string(),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 })
 

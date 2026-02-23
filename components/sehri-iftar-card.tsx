@@ -7,7 +7,8 @@ import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 export function SehriIftarCard() {
-  const { timings, loading } = useAppSelector((state) => state.prayer)
+  const timings = useAppSelector((state) => state.prayer.timings)
+  const loading = useAppSelector((state) => state.prayer.loading)
   const [now, setNow] = useState(new Date())
 
   useEffect(() => {

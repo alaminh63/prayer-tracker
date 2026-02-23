@@ -22,7 +22,7 @@ const initialState: SettingsState = {
   autoLocation: true,
   calculationMethod: 2,
   asrMethod: 1, 
-  hijriOffset: 0,
+  hijriOffset: -1,
   language: "bn",
   notificationPermission: "default",
   audioEnabled: typeof window !== "undefined" ? localStorage.getItem("salat_audio_enabled") === "true" : false,

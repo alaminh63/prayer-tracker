@@ -11,9 +11,9 @@ import {
 
 export function CountdownTimer() {
   const dispatch = useAppDispatch()
-  const { timings, nextPrayer, timeLeft } = useAppSelector(
-    (state) => state.prayer
-  )
+  const timings = useAppSelector((state) => state.prayer.timings)
+  const nextPrayer = useAppSelector((state) => state.prayer.nextPrayer)
+  const timeLeft = useAppSelector((state) => state.prayer.timeLeft)
   const [displayTime, setDisplayTime] = useState("--:--:--")
   const { t } = useTranslation()
 

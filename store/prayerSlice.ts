@@ -13,6 +13,7 @@ interface PrayerState {
   monthlyTimings: any[] | null
   loading: boolean
   error: string | null
+  lastHijriAdjustment: number | null // null = force fresh fetch on startup
 }
 
 const initialState: PrayerState = {
@@ -27,6 +28,7 @@ const initialState: PrayerState = {
   monthlyTimings: null,
   loading: false,
   error: null,
+  lastHijriAdjustment: null, // null forces a fresh fetch on app startup
 }
 
 const CACHE_KEY = "salat_prayer_cache"
@@ -54,27 +56,34 @@ const loadInitialState = (): PrayerState => {
 export const fetchPrayerTimes = createAsyncThunk(
   "prayer/fetchPrayerTimes",
   async (
-    params: { latitude: number; longitude: number; method: number; school: number },
+    params: { latitude: number; longitude: number; method: number; school: number; hijriAdjustment?: number },
     { getState, rejectWithValue }
   ) => {
-    const { latitude, longitude, method, school } = params
+    const { latitude, longitude, method, school, hijriAdjustment = 0 } = params
     const state = getState() as { prayer: PrayerState }
     
-    // Performance: Don't fetch if we already have timings for today
+    // Performance: Skip fetch if today's data was already fetched with the same hijriAdjustment
+    // lastHijriAdjustment = null means fresh start — always fetch
     const today = new Date().toISOString().split("T")[0]
     if (
-      state.prayer.timings && 
-      state.prayer.gregorianDate && 
-      new Date(state.prayer.gregorianDate).toISOString().split("T")[0] === today
+      state.prayer.timings &&
+      state.prayer.gregorianDate &&
+      new Date(state.prayer.gregorianDate).toISOString().split("T")[0] === today &&
+      state.prayer.lastHijriAdjustment !== null &&
+      state.prayer.lastHijriAdjustment === hijriAdjustment
     ) {
-      // Basic param check could be added here if needed, but usually location doesn't jump
-      return null // Indicate we don't need to update
+      return null // Already up-to-date, skip
     }
 
     try {
-      const res = await fetch(
-        `/api/prayer-times?latitude=${latitude}&longitude=${longitude}&method=${method}&school=${school}`
-      )
+      const query = new URLSearchParams({
+        latitude: String(latitude),
+        longitude: String(longitude),
+        method: String(method),
+        school: String(school),
+      })
+      if (hijriAdjustment !== 0) query.set("adjustment", String(hijriAdjustment))
+      const res = await fetch(`/api/prayer-times?${query.toString()}`)
       if (!res.ok) throw new Error("Failed to fetch prayer times")
       const data = await res.json()
       
@@ -86,7 +95,7 @@ export const fetchPrayerTimes = createAsyncThunk(
         }))
       }
       
-      return data
+      return { ...data, hijriAdjustment }
     } catch (err) {
       return rejectWithValue(
         err instanceof Error ? err.message : "Failed to fetch prayer times"
@@ -153,6 +162,7 @@ const prayerSlice = createSlice({
           state.hijriMonth = action.payload.hijriMonth
           state.hijriYear = action.payload.hijriYear
           state.gregorianDate = action.payload.gregorianDate
+          state.lastHijriAdjustment = action.payload.hijriAdjustment ?? 0
         }
       })
       .addCase(fetchPrayerTimes.rejected, (state, action) => {

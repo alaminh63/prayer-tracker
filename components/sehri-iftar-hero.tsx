@@ -5,7 +5,8 @@ import { Moon, Sun, Clock } from "lucide-react"
 import { getTimeDiff, formatCountdown, formatTime12 } from "@/lib/prayer-utils"
 
 export function SehriIftarHero() {
-  const { timings, loading } = useAppSelector((state) => state.prayer)
+  const timings = useAppSelector((state) => state.prayer.timings)
+  const loading = useAppSelector((state) => state.prayer.loading)
   const { t } = useTranslation()
   const [now, setNow] = useState(new Date())
 
@@ -47,7 +48,7 @@ export function SehriIftarHero() {
             <Moon className="h-6 w-6" />
           </div>
           <div className="text-center">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">
+            <p className="text-xs font-black uppercase text-zinc-500 mb-1">
               {t.prayers.sehri_ends}
             </p>
             <p className="text-xl font-black text-white font-mono tabular-nums tracking-tighter">
@@ -56,7 +57,7 @@ export function SehriIftarHero() {
             {sehriDiff > 0 && (
               <div className="mt-2 flex items-center justify-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
                 <Clock className="h-2.5 w-2.5 text-primary" />
-                <span className="text-[9px] font-black text-primary tabular-nums">{formatCountdown(sehriDiff)}</span>
+                <span className="text-[11px] font-black text-primary tabular-nums">{formatCountdown(sehriDiff)}</span>
               </div>
             )}
           </div>
@@ -71,7 +72,7 @@ export function SehriIftarHero() {
             <Sun className="h-6 w-6" />
           </div>
           <div className="text-center">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">
+            <p className="text-xs font-black uppercase text-zinc-500 mb-1">
               {t.prayers.iftar_time}
             </p>
             <p className="text-xl font-black text-white font-mono tabular-nums tracking-tighter">
@@ -80,7 +81,7 @@ export function SehriIftarHero() {
             {iftarDiff > 0 && (
               <div className="mt-2 flex items-center justify-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20">
                 <Clock className="h-2.5 w-2.5 text-accent" />
-                <span className="text-[9px] font-black text-accent tabular-nums">{formatCountdown(iftarDiff)}</span>
+                <span className="text-[11px] font-black text-accent tabular-nums">{formatCountdown(iftarDiff)}</span>
               </div>
             )}
           </div>

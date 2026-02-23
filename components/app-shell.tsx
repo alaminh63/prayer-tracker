@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Home, Clock, Bell, Settings, Compass, Calendar, Calculator, Hand, BookOpen, Heart, Activity, SunMoon, Coins, Bookmark, History as HistoryIcon, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -10,6 +11,8 @@ import { useTranslation } from "@/hooks/use-translation"
 import { GlobalAudioPlayer } from "@/components/quran/global-audio-player"
 import { AdhanPlayer } from "@/components/adhan-player"
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt"
+import { LocationSoftPrompt } from "@/components/location-soft-prompt"
+import { BottomNav } from "@/components/bottom-nav"
 
 const navItems = [
   { href: "/", icon: Home, label: "Home", translationKey: "home" },
@@ -39,28 +42,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background">
       <LocationInitializer />
+      <LocationSoftPrompt />
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0 border-r border-border bg-card/50">
         <div className="flex flex-col flex-1 px-4 pt-8 pb-4">
           {/* Logo */}
           <div className="flex items-center gap-3 px-3 mb-10">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 border border-primary/20">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5 text-primary"
-                aria-hidden="true"
-              >
-                <path d="M12 2C8 6 4 10 4 14v6a2 2 0 002 2h12a2 2 0 002-2v-6c0-4-4-8-8-12z" />
-                <path d="M12 22v-6" />
-                <path d="M9 22v-3a3 3 0 016 0v3" />
-              </svg>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 overflow-hidden p-1">
+              <Image
+                src="/logo.png"
+                alt="CloudGen Logo"
+                width={32}
+                height={32}
+                className="object-contain dark:invert"
+              />
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground tracking-tight">CloudGen</h1>
@@ -117,37 +113,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Mobile Bottom Nav */}
-      <nav
-        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t border-border bg-card/90 backdrop-blur-xl"
-        aria-label="Mobile navigation"
-      >
-        <div className="flex items-center gap-1 py-1 px-2 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory">
-          {translatedNavItems.map((item) => {
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex flex-col items-center gap-0.5 min-w-[72px] py-1.5 rounded-xl transition-all relative snap-center",
-                  isActive
-                    ? "text-primary"
-                    : "text-muted-foreground active:text-foreground"
-                )}
-                aria-current={isActive ? "page" : undefined}
-              >
-                {isActive && (
-                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-primary" />
-                )}
-                <item.icon className={cn("h-5 w-5", isActive && "drop-shadow-[0_0_6px_oklch(0.80_0.13_85/0.5)]")} aria-hidden="true" />
-                <span className="text-[10px] font-medium whitespace-nowrap">{item.label}</span>
-              </Link>
-            )
-          })}
-        </div>
-        {/* Safe area for iOS */}
-        <div className="h-[env(safe-area-inset-bottom)]" />
-      </nav>
+      <BottomNav />
 
       <GlobalAudioPlayer />
       <AdhanPlayer />

@@ -6,15 +6,17 @@ import { setCurrentAndNext } from "@/store/prayerSlice"
 import {
   getCurrentAndNextPrayer,
   formatCountdown,
-  PRAYER_LABELS,
   PRAYER_ARABIC,
 } from "@/lib/prayer-utils"
+import { useTranslation } from "@/hooks/use-translation"
 
 export function CountdownRing() {
   const dispatch = useAppDispatch()
-  const { timings, nextPrayer, timeLeft, loading } = useAppSelector(
-    (state) => state.prayer
-  )
+  const timings = useAppSelector((state) => state.prayer.timings)
+  const nextPrayer = useAppSelector((state) => state.prayer.nextPrayer)
+  const timeLeft = useAppSelector((state) => state.prayer.timeLeft)
+  const loading = useAppSelector((state) => state.prayer.loading)
+  const { t } = useTranslation()
   const [displayTime, setDisplayTime] = useState("--:--:--")
   const [progress, setProgress] = useState(0)
 
@@ -100,13 +102,13 @@ export function CountdownRing() {
         </svg>
         {/* Center content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground mb-2">
-            Next Prayer
+          <p className="text-xs font-medium uppercase text-muted-foreground mb-2">
+            {t.prayers.next_prayer}
           </p>
           {nextPrayer && (
             <>
               <p className="text-lg font-bold text-glow-gold">
-                {PRAYER_LABELS[nextPrayer]}
+                {t.prayers[nextPrayer.toLowerCase() as keyof typeof t.prayers]}
               </p>
               <p className="text-xs text-muted-foreground font-serif mb-3">
                 {PRAYER_ARABIC[nextPrayer]}
@@ -127,10 +129,10 @@ export function CountdownRing() {
       </div>
 
       {/* Time unit labels below */}
-      <div className="flex items-center gap-8 text-[10px] uppercase tracking-widest text-muted-foreground">
-        <span>Hours</span>
-        <span>Minutes</span>
-        <span>Seconds</span>
+      <div className="flex items-center gap-8 text-xs uppercase text-muted-foreground">
+        <span>{t.common.hours}</span>
+        <span>{t.common.minutes}</span>
+        <span>{t.common.seconds}</span>
       </div>
     </div>
   )

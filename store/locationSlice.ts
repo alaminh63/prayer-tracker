@@ -7,15 +7,48 @@ interface LocationState {
   loading: boolean
   error: string | null
   permissionDenied: boolean
+  showSoftPrompt: boolean
 }
 
+const LOCATION_CACHE_KEY = "salat_location_cache"
+
+// Load persisted location from localStorage on startup
+const loadPersistedLocation = (): Pick<LocationState, "latitude" | "longitude" | "city"> => {
+  if (typeof window === "undefined") return { latitude: null, longitude: null, city: null }
+  try {
+    const raw = localStorage.getItem(LOCATION_CACHE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed.latitude && parsed.longitude) {
+        return { latitude: parsed.latitude, longitude: parsed.longitude, city: parsed.city || null }
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return { latitude: null, longitude: null, city: null }
+}
+
+// Persist location to localStorage
+const persistLocation = (latitude: number, longitude: number, city: string) => {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify({ latitude, longitude, city }))
+  } catch {
+    // ignore
+  }
+}
+
+const persisted = loadPersistedLocation()
+
 const initialState: LocationState = {
-  latitude: null,
-  longitude: null,
-  city: null,
+  latitude: persisted.latitude,
+  longitude: persisted.longitude,
+  city: persisted.city,
   loading: false,
   error: null,
   permissionDenied: false,
+  showSoftPrompt: false, // never show on reload if location is cached
 }
 
 export const fetchLocation = createAsyncThunk(
@@ -48,6 +81,9 @@ export const fetchLocation = createAsyncThunk(
         console.error("Reverse geocoding failed:", err)
       }
 
+      // Persist to localStorage so next reload skips the prompt
+      persistLocation(latitude, longitude, city)
+
       return { latitude, longitude, city }
     } catch (error: any) {
       return rejectWithValue(error.message || "Failed to get location")
@@ -70,6 +106,11 @@ const locationSlice = createSlice({
       state.longitude = action.payload.longitude
       state.error = null
       state.permissionDenied = false
+      // Also persist manual location
+      persistLocation(action.payload.latitude, action.payload.longitude, state.city || "")
+    },
+    setShowSoftPrompt: (state, action: PayloadAction<boolean>) => {
+      state.showSoftPrompt = action.payload
     },
   },
   extraReducers: (builder) => {
@@ -89,13 +130,14 @@ const locationSlice = createSlice({
         state.loading = false
         state.error = action.payload as string
         state.permissionDenied = true
-        // Fallback to Dhaka
+        // Fallback to Dhaka — also persist so next reload uses this
         state.latitude = 23.8103
         state.longitude = 90.4125
         state.city = "Dhaka"
+        persistLocation(23.8103, 90.4125, "Dhaka")
       })
   },
 })
 
-export const { setCity, setManualLocation } = locationSlice.actions
+export const { setCity, setManualLocation, setShowSoftPrompt } = locationSlice.actions
 export default locationSlice.reducer

@@ -3,7 +3,6 @@
 import { useAppSelector } from "@/store/hooks"
 import {
   PRAYER_NAMES,
-  PRAYER_LABELS,
   PRAYER_ARABIC,
   parseTimeString,
   formatTime12,
@@ -48,9 +47,10 @@ function DawnIcon(props: any) {
 
 
 export function PrayerList() {
-  const { timings, currentPrayer, nextPrayer, loading } = useAppSelector(
-    (state) => state.prayer
-  )
+  const timings = useAppSelector((state) => state.prayer.timings)
+  const currentPrayer = useAppSelector((state) => state.prayer.currentPrayer)
+  const nextPrayer = useAppSelector((state) => state.prayer.nextPrayer)
+  const loading = useAppSelector((state) => state.prayer.loading)
   const { t } = useTranslation()
 
   if (loading || !timings) {
@@ -146,7 +146,7 @@ export function PrayerList() {
                 >
                   {t.prayers[getPrayerKey(name)]}
                 </p>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-normal font-arabic flex items-center gap-2">
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-normal font-arabic flex items-center gap-2">
                   <span className="opacity-50">•</span> {PRAYER_ARABIC[name]}
                 </p>
               </div>
@@ -158,10 +158,10 @@ export function PrayerList() {
                   <motion.div
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-[10px] font-black text-primary uppercase tracking-normal border border-primary/20 backdrop-blur-md"
+                    className="flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-black text-primary uppercase tracking-normal border border-primary/20 backdrop-blur-md"
                   >
                     <Sparkles className="h-3 w-3 fill-primary" />
-                    পরবর্তী নামাজ
+                    {t.prayers.next_prayer}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -182,8 +182,8 @@ export function PrayerList() {
                   {formatTime12(timings[name])}
                 </span>
                 {isActive && (
-                  <span className="text-[10px] font-bold text-accent uppercase tracking-widest animate-pulse">
-                    চলছে
+                  <span className="text-xs font-bold text-accent uppercase animate-pulse">
+                    {t.common.running}
                   </span>
                 )}
               </div>

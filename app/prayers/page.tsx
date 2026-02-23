@@ -32,7 +32,7 @@ export default function PrayersPage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 px-2">
             <div>
               <h2 className="text-3xl font-black text-foreground dark:text-white tracking-tight">{t.prayers.all_prayers}</h2>
-              <p className="text-muted-foreground font-bold uppercase tracking-widest text-[10px] mt-1">Detailed view of all prayer timings</p>
+              <p className="text-muted-foreground font-bold uppercase text-xs mt-1">{t.prayers.subtitle}</p>
             </div>
 
             <div className="flex p-1.5 bg-secondary rounded-2xl border border-border backdrop-blur-xl">
@@ -100,7 +100,7 @@ export default function PrayersPage() {
                 "{t.common.tracker_verse}"
               </p>
               <div className="h-px w-24 bg-primary/30" />
-              <p className="text-sm font-black text-primary uppercase tracking-[0.3em]">{t.common.tracker_source}</p>
+              <p className="text-sm font-black text-primary uppercase">{t.common.tracker_source}</p>
            </div>
         </div>
       </div>

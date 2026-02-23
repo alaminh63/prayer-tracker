@@ -4,8 +4,11 @@ import { useAppSelector } from "@/store/hooks"
 import { Calendar } from "lucide-react"
 
 export function DateDisplay() {
-  const { hijriDate, hijriMonth, hijriYear, gregorianDate, loading } =
-    useAppSelector((state) => state.prayer)
+  const hijriDate = useAppSelector((state) => state.prayer.hijriDate)
+  const hijriMonth = useAppSelector((state) => state.prayer.hijriMonth)
+  const hijriYear = useAppSelector((state) => state.prayer.hijriYear)
+  const gregorianDate = useAppSelector((state) => state.prayer.gregorianDate)
+  const loading = useAppSelector((state) => state.prayer.loading)
 
   if (loading) {
     return (

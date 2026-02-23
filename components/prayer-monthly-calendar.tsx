@@ -11,7 +11,8 @@ export function PrayerMonthlyCalendar() {
   const dispatch = useAppDispatch()
   const { latitude, longitude } = useAppSelector((state) => state.location)
   const { calculationMethod, asrMethod } = useAppSelector((state) => state.settings)
-  const { monthlyTimings, loading } = useAppSelector((state) => state.prayer)
+  const monthlyTimings = useAppSelector((state) => state.prayer.monthlyTimings)
+  const loading = useAppSelector((state) => state.prayer.loading)
   const { t } = useTranslation()
 
   useEffect(() => {

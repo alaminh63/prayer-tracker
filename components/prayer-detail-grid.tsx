@@ -3,7 +3,6 @@
 import { useAppSelector } from "@/store/hooks"
 import {
   PRAYER_NAMES,
-  PRAYER_LABELS,
   PRAYER_ARABIC,
   parseTimeString,
   formatTime12,
@@ -12,11 +11,14 @@ import {
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 import { Sunrise, Clock, Bell, BellOff } from "lucide-react"
+import { useTranslation } from "@/hooks/use-translation"
 
 export function PrayerDetailGrid() {
-  const { timings, currentPrayer, nextPrayer, loading } = useAppSelector(
-    (state) => state.prayer
-  )
+  const timings = useAppSelector((state) => state.prayer.timings)
+  const currentPrayer = useAppSelector((state) => state.prayer.currentPrayer)
+  const nextPrayer = useAppSelector((state) => state.prayer.nextPrayer)
+  const loading = useAppSelector((state) => state.prayer.loading)
+  const { t } = useTranslation()
 
   if (loading || !timings) {
     return (
@@ -32,7 +34,7 @@ export function PrayerDetailGrid() {
   
   const allItems = prayers.map(name => ({
     name,
-    label: PRAYER_LABELS[name],
+    label: t.prayers[name.toLowerCase() as keyof typeof t.prayers],
     arabic: PRAYER_ARABIC[name],
     time: timings[name],
     isNext: nextPrayer === name,
@@ -43,7 +45,7 @@ export function PrayerDetailGrid() {
   const sunriseIdx = allItems.findIndex(p => p.name === "Fajr") + 1
   allItems.splice(sunriseIdx, 0, {
     name: "Sunrise" as any,
-    label: "সূর্যোদয়",
+    label: t.prayers.sunrise,
     arabic: "شروق",
     time: timings.Sunrise,
     isNext: false,
@@ -88,9 +90,9 @@ export function PrayerDetailGrid() {
                     ? "bg-primary/20 border-primary/40 text-primary rotate-3 group-hover:rotate-6" 
                     : prayer.isCurrent
                         ? "bg-accent/20 border-accent/40 text-accent"
-                      : "bg-muted/50 border-border text-muted-foreground"
+                        : "bg-muted/50 border-border text-muted-foreground"
                 )}>
-                  {prayer.isSunrise ? <Sunrise size={24} /> : <span className="text-xl font-black">{prayer.label.charAt(0)}</span>}
+                  {prayer.isSunrise ? <Sunrise size={24} /> : <div className="p-1"><Clock size={20} /></div>}
                 </div>
                 
                 <div>
@@ -100,7 +102,7 @@ export function PrayerDetailGrid() {
                   )}>
                     {prayer.label}
                   </h3>
-                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">
+                  <p className="text-xs text-muted-foreground font-black uppercase mt-0.5">
                     {prayer.arabic}
                   </p>
                 </div>
@@ -120,15 +122,15 @@ export function PrayerDetailGrid() {
             <div className="mt-6 flex items-center justify-between">
                <div className="flex items-center gap-2">
                  {prayer.isNext && (
-                   <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-primary/20">
+                    <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-black uppercase flex items-center gap-1.5 shadow-lg shadow-primary/20">
                      <Clock size={12} className="animate-spin-slow" />
-                     Coming UP
+                     {t.common.next}
                    </span>
                  )}
                  {prayer.isCurrent && (
-                   <span className="px-3 py-1 rounded-full bg-accent/20 text-accent text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 border border-accent/30 shadow-lg shadow-accent/20">
+                    <span className="px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-black uppercase flex items-center gap-2 border border-accent/30 shadow-lg shadow-accent/20">
                      <div className="h-1.5 w-1.5 rounded-full bg-accent animate-ping" />
-                     Running
+                     {t.common.running}
                    </span>
                  )}
                </div>

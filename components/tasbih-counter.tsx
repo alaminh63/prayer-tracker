@@ -50,9 +50,9 @@ export function TasbihCounter() {
           onChange={(e) => setTarget(Number(e.target.value))}
           className="bg-secondary/50 border border-border/50 rounded-lg px-2 py-1 text-xs font-bold focus:outline-hidden ring-primary/20"
         >
-          <option value={33}>Target: 33</option>
-          <option value={99}>Target: 99</option>
-          <option value={100}>Target: 100</option>
+          <option value={33}>{t.common.target}: 33</option>
+          <option value={99}>{t.common.target}: 99</option>
+          <option value={100}>{t.common.target}: 100</option>
         </select>
       </div>
 
@@ -91,7 +91,7 @@ export function TasbihCounter() {
           >
             {count}
           </div>
-          <p className="text-sm font-bold text-muted-foreground uppercase tracking-tighter">SubhanAllah</p>
+          <p className="text-sm font-bold text-muted-foreground uppercase tracking-tighter">{t.common.subhanallah}</p>
         </div>
 
         {/* Floating Icon */}
@@ -104,7 +104,7 @@ export function TasbihCounter() {
       <div className="flex items-center justify-around bg-secondary/30 rounded-2xl p-4 border border-border/50">
         <div className="text-center flex flex-col items-center gap-1">
           <History className="h-4 w-4 text-muted-foreground" />
-          <span className="text-[10px] uppercase font-bold text-muted-foreground">Total</span>
+          <span className="text-[10px] uppercase font-bold text-muted-foreground">{t.common.total}</span>
           <span className="text-sm font-black">{totalCount}</span>
         </div>
 
@@ -120,12 +120,12 @@ export function TasbihCounter() {
           <div className="h-10 w-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center group-hover:bg-destructive group-hover:text-white transition-all">
             <RotateCcw className="h-5 w-5" />
           </div>
-          <span className="text-[10px] font-bold uppercase text-muted-foreground">Reset</span>
+          <span className="text-[10px] font-bold uppercase text-muted-foreground">{t.common.reset}</span>
         </button>
       </div>
 
       <p className="text-[10px] text-center text-muted-foreground">
-        Haptic feedback will trigger on every tap.
+        {t.common.haptic_note}
       </p>
     </div>
   )

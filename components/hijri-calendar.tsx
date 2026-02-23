@@ -10,7 +10,7 @@ import { useCalendar, useYearlyCalendar, CalendarDay } from "@/hooks/use-calenda
 export function HijriCalendar() {
   const [viewDate, setViewDate] = useState(new Date())
   const { latitude, longitude } = useAppSelector((state) => state.location)
-  const { calculationMethod } = useAppSelector((state) => state.settings)
+  const { calculationMethod, hijriOffset } = useAppSelector((state) => state.settings)
   const [view, setView] = useState<"monthly" | "yearly">("monthly")
   
   const currentMonth = viewDate.getMonth() + 1
@@ -21,7 +21,8 @@ export function HijriCalendar() {
     currentMonth,
     latitude,
     longitude,
-    calculationMethod
+    calculationMethod,
+    hijriOffset
   )
 
   const nextMonth = () => {
@@ -244,7 +245,8 @@ export function HijriCalendar() {
           currentYear={currentYear} 
           latitude={latitude} 
           longitude={longitude} 
-          calculationMethod={calculationMethod} 
+          calculationMethod={calculationMethod}
+          hijriOffset={hijriOffset}
         />
       )}
     </div>
@@ -255,14 +257,16 @@ function YearlyView({
   currentYear, 
   latitude, 
   longitude, 
-  calculationMethod 
+  calculationMethod,
+  hijriOffset = 0
 }: { 
   currentYear: number
   latitude: number | null
   longitude: number | null
   calculationMethod: number
+  hijriOffset?: number
 }) {
-  const { calendar, isLoading } = useYearlyCalendar(currentYear, latitude, longitude, calculationMethod)
+  const { calendar, isLoading } = useYearlyCalendar(currentYear, latitude, longitude, calculationMethod, hijriOffset)
 
   if (isLoading) {
     return (

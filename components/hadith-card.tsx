@@ -59,7 +59,7 @@ export function HadithCard() {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 bg-card border border-border backdrop-blur-3xl shadow-2xl flex flex-col justify-center min-h-[300px]"
+      className="group relative overflow-hidden rounded-[2.5rem] p-8 bg-card border border-border backdrop-blur-3xl shadow-2xl flex flex-col justify-center min-h-[300px]"
     >
       {/* Decorative Quote Icon */}
       <div className="absolute -top-10 -right-10 opacity-[0.02] text-primary transition-transform group-hover:scale-110 duration-700 pointer-events-none">

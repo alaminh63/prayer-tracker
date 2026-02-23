@@ -75,9 +75,33 @@ export function getCurrentAndNextPrayer(
 ): { current: PrayerName | null; next: PrayerName; timeLeft: number } {
   const now = new Date()
 
+  // Special check for Sunrise: Fajr ends when Sunrise begins
+  const sunriseTime = parseTimeString(timings.Sunrise)
+  const fajrTime = parseTimeString(timings.Fajr)
+
+  // If we are between Fajr and Sunrise, current is Fajr
+  if (now >= fajrTime && now < sunriseTime) {
+    return {
+      current: "Fajr",
+      next: "Dhuhr", // We skip Sunrise in next prayer usually, but Sunrise is coming up. 
+      // Actually per app logic Dhuhr is the next SALAT.
+      timeLeft: parseTimeString(timings.Dhuhr).getTime() - now.getTime(),
+    }
+  }
+
   for (let i = 0; i < PRAYER_NAMES.length; i++) {
     const prayerTime = parseTimeString(timings[PRAYER_NAMES[i]])
     if (now < prayerTime) {
+      // If we are before any prayer, the current one is the previous one
+      // BUT if we are before Dhuhr and after Sunrise, current prayer is null (No active prayer)
+      if (PRAYER_NAMES[i] === "Dhuhr" && now >= sunriseTime) {
+        return {
+          current: null,
+          next: "Dhuhr",
+          timeLeft: prayerTime.getTime() - now.getTime(),
+        }
+      }
+
       return {
         current: i > 0 ? PRAYER_NAMES[i - 1] : null,
         next: PRAYER_NAMES[i],

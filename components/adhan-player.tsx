@@ -8,7 +8,7 @@ import { setAudioEnabled } from "@/store/settingsSlice"
 
 export function AdhanPlayer() {
   const dispatch = useAppDispatch()
-  const { timings } = useAppSelector((state) => state.prayer)
+  const timings = useAppSelector((state) => state.prayer.timings)
   const { azanAlert, audioEnabled } = useAppSelector((state) => state.settings)
   const [isPlaying, setIsPlaying] = useState(false)
   const [mounted, setMounted] = useState(false)
